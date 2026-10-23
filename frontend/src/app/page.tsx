@@ -1,13 +1,10 @@
 import { StorefrontShell } from "@/components/layout/StorefrontShell";
-import { HeroSlider } from "@/components/home/HeroSlider";
 import { Catalog } from "@/components/home/Catalog";
 import { getStorefrontData } from "@/lib/api/server";
 import { config } from "@/lib/config";
 
-export const revalidate = 60;
-
 export default async function HomePage() {
-  const { categories, products, banners, settings } = await getStorefrontData();
+  const { categories, products, settings } = await getStorefrontData();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -29,8 +26,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <HeroSlider banners={banners} />
-      <div id="menu" className="scroll-mt-20">
+      <div id="menu" className="scroll-mt-20 pt-2 md:pt-4">
         <Catalog
           initialCategories={categories}
           initialProducts={products}

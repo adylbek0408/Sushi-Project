@@ -1,6 +1,8 @@
 # Environment
 .env
 **/.env
+.env*.local
+**/.env*.local
 !.env.example
 !**/.env.example
 
@@ -29,6 +31,12 @@ yarn-debug.log*
 htmlcov/
 dist/
 build/
+
+# Cloudflare Workers static assets (copied from frontend/out after build:static)
+/public/
+.wrangler/
+.dev.vars
+teyva-menu-public.zip
 
 # Editor / OS
 .DS_Store

@@ -69,7 +69,7 @@ export function ProductCard({ product, currency }: ProductCardProps) {
         type="button"
         aria-label={`Добавить «${product.name}» в корзину`}
         onClick={handleAdd}
-        className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_4px_12px_rgba(180,31,0,0.3)] transition-all duration-200 hover:bg-primary/90 active:scale-90 md:bottom-6 md:right-6 md:h-12 md:w-12"
+        className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_4px_12px_rgba(254,129,40,0.35)] transition-all duration-200 hover:bg-primary/90 active:scale-90 md:bottom-6 md:right-6 md:h-12 md:w-12"
       >
         <Icon name="add" />
       </button>

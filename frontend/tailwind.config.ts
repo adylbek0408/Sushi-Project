@@ -10,16 +10,17 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        primary: "#b41f00",
+        // Teyva brand orange (logo accent)
+        primary: "#FE8128",
         "on-primary": "#ffffff",
-        "primary-container": "#d93717",
-        "on-primary-container": "#fffbff",
-        "primary-fixed": "#ffdad3",
-        "primary-fixed-dim": "#ffb4a4",
-        "on-primary-fixed": "#3e0500",
-        "on-primary-fixed-variant": "#8d1600",
-        "inverse-primary": "#ffb4a4",
-        "surface-tint": "#b82000",
+        "primary-container": "#E56F1A",
+        "on-primary-container": "#fff8f3",
+        "primary-fixed": "#ffe5d0",
+        "primary-fixed-dim": "#ffc9a0",
+        "on-primary-fixed": "#3b1a00",
+        "on-primary-fixed-variant": "#9a4a0a",
+        "inverse-primary": "#ffc9a0",
+        "surface-tint": "#FE8128",
 
         secondary: "#5f5e5e",
         "on-secondary": "#ffffff",
@@ -48,7 +49,7 @@ const config: Config = {
         "on-background": "#1b1b1e",
         surface: "#fbf9fc",
         "on-surface": "#1b1b1e",
-        "on-surface-variant": "#5b403a",
+        "on-surface-variant": "#5c4638",
         "surface-variant": "#e3e2e5",
         "surface-dim": "#dbd9dd",
         "surface-bright": "#fbf9fc",
@@ -59,8 +60,8 @@ const config: Config = {
         "surface-container-highest": "#e3e2e5",
         "inverse-surface": "#303033",
         "inverse-on-surface": "#f2f0f3",
-        outline: "#907069",
-        "outline-variant": "#e4beb6",
+        outline: "#91705e",
+        "outline-variant": "#e8c9b4",
 
         whatsapp: "#25D366",
         "whatsapp-dark": "#128C7E",
@@ -110,7 +111,7 @@ const config: Config = {
       boxShadow: {
         "elevation-1": "0px 4px 20px rgba(0,0,0,0.04)",
         "elevation-2": "0px 8px 24px rgba(0,0,0,0.08)",
-        "cart-bar": "0px 8px 32px rgba(180,31,0,0.4)",
+        "cart-bar": "0px 8px 32px rgba(254,129,40,0.4)",
       },
       keyframes: {
         "slide-up": {

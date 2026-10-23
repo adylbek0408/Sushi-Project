@@ -12,9 +12,6 @@ import { formatPrice } from "@/lib/format";
 import { config, mediaUrl } from "@/lib/config";
 import type { Product } from "@/types";
 
-export const revalidate = 60;
-export const dynamicParams = true;
-
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
@@ -26,6 +23,24 @@ async function loadProduct(slug: string): Promise<Product | null> {
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
   }
+}
+
+/**
+ * Required for `output: "export"` (Cloudflare static).
+ * Next forbids an empty array with static export — use a placeholder when the
+ * API is unreachable at build time (real product HTML is still client-navigable
+ * from the catalog; deep-link SEO pages need a rebuild with API up).
+ */
+export async function generateStaticParams() {
+  try {
+    const products = await catalogApi.getProducts({});
+    if (products.length > 0) {
+      return products.map((product) => ({ slug: product.slug }));
+    }
+  } catch {
+    /* fall through */
+  }
+  return [{ slug: "__placeholder__" }];
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
@@ -46,6 +61,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ProductPage({ params }: PageProps) {
   const { slug } = await params;
+  if (slug === "__placeholder__") notFound();
+
   const [product, settings] = await Promise.all([loadProduct(slug), getSettingsSafe()]);
 
   if (!product) notFound();

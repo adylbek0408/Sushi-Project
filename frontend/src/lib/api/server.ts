@@ -1,20 +1,10 @@
 import "server-only";
 import { catalogApi } from "./catalog";
 import { settingsApi } from "./settings";
+import { DEFAULT_SETTINGS } from "./defaults";
 import type { Banner, Category, Product, ShopSettings } from "@/types";
 
-export const DEFAULT_SETTINGS: ShopSettings = {
-  shop_name: "Sushiya",
-  whatsapp_number: "996700000000",
-  currency: "сом",
-  city: "Бишкек",
-  pickup_address: "ул. Киевская 49А",
-  min_order_amount: "0.00",
-  delivery_is_free: true,
-  delivery_fee: "0.00",
-  working_hours: "10:00 – 23:00",
-  is_accepting_orders: true,
-};
+export { DEFAULT_SETTINGS };
 
 export interface StorefrontData {
   categories: Category[];

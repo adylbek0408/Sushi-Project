@@ -88,7 +88,7 @@ export function HeroSlider({ banners }: HeroSliderProps) {
                 ) : (
                   <div
                     aria-hidden
-                    className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,#d93717_0%,#b41f00_45%,#7a1500_100%)]"
+                    className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,#FF9A4A_0%,#FE8128_45%,#C45F12_100%)]"
                   />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/30 to-transparent" />

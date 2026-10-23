@@ -1,0 +1,11 @@
+# Cloudflare Worker for https://menu.teyva.us
+# Domain/DNS/SSL are already attached by backend — do not change them here.
+name = "teyva-menu"
+compatibility_date = "2025-10-01"
+workers_dev = false
+
+[assets]
+directory = "./public"
+# SPA-style fallback so client routes (/search, /orders, /product/…) don't 404
+not_found_handling = "single-page-application"
+html_handling = "auto"

@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icon } from "@/components/ui/Icon";
 import { Input, Textarea } from "@/components/ui/Input";
-import { SegmentedToggle } from "./SegmentedToggle";
 import { CartItemRow } from "./CartItemRow";
 import { checkoutSchema, type CheckoutFormValues } from "./checkoutSchema";
 import { useCartStore, selectTotalAmount } from "@/store/cart";
@@ -37,16 +36,18 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { deliveryType: "delivery", address: "", customerName: "", phone: "", comment: "" },
+    defaultValues: {
+      deliveryType: "delivery",
+      address: "",
+      customerName: "",
+      phone: "",
+      comment: "",
+    },
   });
-
-  const deliveryType = watch("deliveryType");
 
   useEffect(() => {
     if (isOpen) document.body.style.overflow = "hidden";
@@ -61,19 +62,37 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
     if (items.length === 0) return;
 
     try {
-      const order = await createOrder.mutateAsync({
-        delivery_type: values.deliveryType,
-        items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
-        customer_name: values.customerName?.trim() || undefined,
-        phone: values.phone?.trim() || undefined,
-        address: values.address?.trim() || undefined,
-        comment: values.comment?.trim() || undefined,
-      });
+      // Prefer server order when API allows it; Teyva public /orders needs auth,
+      // so we fall back to WhatsApp + local history (same UX as the CTA).
+      let orderId = crypto.randomUUID();
+      let orderNumber = Date.now() % 100000;
+      let orderTotal = String(total);
+      const deliveryType = "delivery" as const;
+      let createdAt = new Date().toISOString();
+
+      try {
+        const order = await createOrder.mutateAsync({
+          delivery_type: deliveryType,
+          items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
+          customer_name: values.customerName?.trim() || undefined,
+          phone: values.phone?.trim() || undefined,
+          address: values.address?.trim() || undefined,
+          comment: values.comment?.trim() || undefined,
+        });
+        orderId = order.id;
+        orderNumber = order.number;
+        orderTotal = order.total_amount;
+        createdAt = order.created_at;
+      } catch (error) {
+        if (!(error instanceof ApiError && (error.status === 401 || error.status === 403 || error.status === 404))) {
+          throw error;
+        }
+      }
 
       const message = buildWhatsAppMessage({
-        deliveryType: values.deliveryType,
+        deliveryType,
         items,
-        total: Number(order.total_amount),
+        total: Number(orderTotal),
         currency: settings.currency,
         address: values.address,
         customerName: values.customerName,
@@ -83,16 +102,15 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
       const url = buildWhatsAppUrl(settings.whatsapp_number, message);
 
       addToHistory({
-        id: order.id,
-        number: order.number,
-        deliveryType: order.delivery_type,
-        total: order.total_amount,
+        id: orderId,
+        number: orderNumber,
+        deliveryType,
+        total: orderTotal,
         currency: settings.currency,
         itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
-        createdAt: order.created_at,
+        createdAt,
       });
 
-      // Open WhatsApp after the order is safely persisted.
       window.open(url, "_blank", "noopener,noreferrer");
 
       clearCart();
@@ -158,13 +176,6 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
           onSubmit={handleSubmit(onSubmit)}
           className="no-scrollbar flex-1 overflow-y-auto px-margin-mobile pb-6"
         >
-          <div className="mt-stack-md">
-            <SegmentedToggle
-              value={deliveryType}
-              onChange={(value) => setValue("deliveryType", value, { shouldValidate: false })}
-            />
-          </div>
-
           {items.length === 0 ? (
             <div className="mt-stack-lg flex flex-col items-center gap-2 py-10 text-center">
               <Icon name="shopping_cart" className="text-4xl text-secondary" />
@@ -186,31 +197,13 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
               </div>
 
               <div className="mt-stack-lg space-y-4">
-                {deliveryType === "delivery" ? (
-                  <Input
-                    label="Адрес доставки"
-                    placeholder="Улица, дом, квартира"
-                    icon={<Icon name="location_on" />}
-                    error={errors.address?.message}
-                    {...register("address")}
-                  />
-                ) : (
-                  <>
-                    <Input
-                      label="Имя"
-                      placeholder="Ваше имя"
-                      error={errors.customerName?.message}
-                      {...register("customerName")}
-                    />
-                    <Input
-                      label="Телефон"
-                      type="tel"
-                      placeholder="+996 000 000 000"
-                      error={errors.phone?.message}
-                      {...register("phone")}
-                    />
-                  </>
-                )}
+                <Input
+                  label="Адрес доставки"
+                  placeholder="Улица, дом, квартира"
+                  icon={<Icon name="location_on" />}
+                  error={errors.address?.message}
+                  {...register("address")}
+                />
 
                 <Textarea
                   label="Комментарий"
@@ -235,10 +228,9 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
             type="submit"
             form="checkout-form"
             disabled={items.length === 0 || isSubmitting}
-            className="flex h-16 w-full items-center justify-center gap-3 rounded-full bg-whatsapp font-headline-md text-on-primary shadow-lg transition-all hover:bg-whatsapp-dark active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+            className="flex h-16 w-full items-center justify-center gap-3 rounded-full bg-primary font-headline-md text-on-primary shadow-lg transition-all hover:bg-primary/90 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
           >
-            <Icon name="chat" filled />
-            {isSubmitting ? "Оформляем..." : "Заказать через WhatsApp"}
+            {isSubmitting ? "Оформляем..." : "Заказать"}
           </button>
         </div>
       </div>

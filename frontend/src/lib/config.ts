@@ -11,18 +11,23 @@ export const config = {
   apiBaseUrl: isServer ? internalApiUrl : publicApiUrl,
   publicApiUrl,
   siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
-  apiVersionPrefix: "/api/v1",
+  /**
+   * Teyva prod API (`api.teyva.us`) has no `/api/v1` prefix.
+   * Local Django Sushiya stack still uses `/api/v1` when NEXT_PUBLIC_API_PREFIX is set.
+   */
+  apiVersionPrefix: process.env.NEXT_PUBLIC_API_PREFIX ?? "",
 } as const;
 
 export function apiUrl(path: string): string {
   const base = config.apiBaseUrl.replace(/\/$/, "");
-  return `${base}${config.apiVersionPrefix}${path}`;
+  const prefix = config.apiVersionPrefix.replace(/\/$/, "");
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${prefix}${normalized}`;
 }
 
 /**
- * Resolves a media path returned by the API. The API returns relative paths
- * like "/media/products/x.jpg"; we prefix the public (browser-facing) host so
- * images load both in the browser and during SSR.
+ * Resolves a media path returned by the API. Absolute URLs pass through;
+ * relative paths are prefixed with the public API host.
  */
 export function mediaUrl(path: string | null | undefined): string | null {
   if (!path) return null;

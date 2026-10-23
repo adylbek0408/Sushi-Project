@@ -107,10 +107,9 @@ export function CartSidebar({ settings }: CartSidebarProps) {
           type="button"
           onClick={openCheckout}
           disabled={!hydrated || count === 0}
-          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-whatsapp py-4 font-label-md text-label-md text-white shadow-elevation-1 transition-all hover:bg-whatsapp-dark active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
+          className="flex w-full items-center justify-center gap-2 rounded-2xl bg-primary py-4 font-label-md text-label-md text-on-primary shadow-elevation-1 transition-all hover:bg-primary/90 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
         >
-          <Icon name="chat" filled className="text-[20px]" />
-          Заказать через WhatsApp
+          Заказать
         </button>
       </div>
     </aside>

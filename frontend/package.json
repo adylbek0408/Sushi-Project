@@ -5,6 +5,10 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "build:static": "node scripts/build-static.mjs",
+    "sync:public": "node scripts/sync-public.mjs",
+    "prepare:cf": "npm run build:static && npm run sync:public",
+    "deploy:cf": "npm run prepare:cf && cd .. && npx wrangler deploy",
     "start": "next start",
     "lint": "next lint",
     "typecheck": "tsc --noEmit"
