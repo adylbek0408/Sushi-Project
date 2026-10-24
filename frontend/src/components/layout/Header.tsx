@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { useUiStore } from "@/store/ui";
@@ -19,14 +20,22 @@ export function Header({ settings }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-40 w-full bg-surface/80 backdrop-blur-xl shadow-sm">
-      <div className="mx-auto flex w-full max-w-container-max items-center justify-between px-margin-mobile py-4 md:px-margin-desktop">
-        {/* Brand on every breakpoint; nav only on desktop. */}
+      <div className="mx-auto flex w-full max-w-container-max items-center justify-between px-margin-mobile py-3 md:px-margin-desktop md:py-4">
         <div className="flex items-center gap-8">
-          <Link href="/" className="flex items-center gap-2">
-            <Icon name="ramen_dining" className="text-primary md:hidden" />
-            <span className="font-headline-lg text-headline-md font-bold tracking-tight text-primary md:text-headline-lg">
-              {settings.shop_name}
-            </span>
+          <Link
+            href="/"
+            aria-label={settings.shop_name}
+            className="flex items-center transition-opacity hover:opacity-90 active:scale-[0.98]"
+          >
+            <Image
+              src="/teyva-logo.png?v=4"
+              alt={settings.shop_name}
+              width={971}
+              height={635}
+              priority
+              unoptimized
+              className="h-12 w-auto max-w-[200px] object-contain object-left sm:max-w-none md:h-14"
+            />
           </Link>
 
           <nav className="hidden items-center gap-6 md:flex">

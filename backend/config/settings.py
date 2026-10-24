@@ -246,6 +246,12 @@ JAZZMIN_SETTINGS = {
     "show_ui_builder": False,
 }
 
+# --------------------------------------------------------------------------- #
+# Telegram order notifications
+# --------------------------------------------------------------------------- #
+TELEGRAM_BOT_TOKEN = env("TELEGRAM_BOT_TOKEN", default="")
+TELEGRAM_CHAT_ID = env("TELEGRAM_CHAT_ID", default="")
+
 JAZZMIN_UI_TWEAKS = {
     "theme": "flatly",
     "dark_mode_theme": "darkly",

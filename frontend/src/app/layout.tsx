@@ -14,24 +14,28 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(config.siteUrl),
   title: {
-    default: "Sushiya — премиум доставка суши в Бишкеке",
-    template: "%s · Sushiya",
+    default: "Teyva — меню и доставка",
+    template: "%s · Teyva",
   },
   description:
-    "Свежие роллы и суши за 30 минут. Премиальные ингредиенты, быстрая доставка по Бишкеку. Заказ в один клик через WhatsApp.",
-  keywords: ["суши", "роллы", "доставка суши", "Бишкек", "sushi", "Sushiya"],
+    "Меню Teyva. Заказ в один клик через WhatsApp.",
+  keywords: ["Teyva", "меню", "доставка", "Бишкек", "еда"],
   openGraph: {
-    title: "Sushiya — премиум доставка суши",
-    description: "Свежие роллы за 30 минут. Доставка по Бишкеку.",
+    title: "Teyva — меню",
+    description: "Меню и доставка Teyva.",
     type: "website",
     locale: "ru_RU",
-    siteName: "Sushiya",
+    siteName: "Teyva",
+  },
+  icons: {
+    icon: "/teyva-logo.png",
+    apple: "/teyva-logo.png",
   },
   robots: { index: true, follow: true },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#fbf9fc",
+  themeColor: "#FE8128",
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
@@ -43,9 +47,21 @@ export default function RootLayout({
   return (
     <html lang="ru" className={inter.variable}>
       <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="preload"
+          as="style"
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
+        />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){function ready(){document.documentElement.classList.add("icons-ready")}if(document.fonts&&document.fonts.ready){document.fonts.ready.then(function(){return document.fonts.load('24px "Material Symbols Outlined"')}).then(ready).catch(ready)}else{ready()}setTimeout(ready,2500)})();`,
+          }}
         />
       </head>
       <body>

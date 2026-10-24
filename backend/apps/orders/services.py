@@ -16,6 +16,7 @@ from apps.catalog.models import Product
 from apps.core.models import ShopSettings
 
 from .models import DeliveryType, Order, OrderItem
+from .telegram import notify_new_order
 
 
 class OrderValidationError(Exception):
@@ -67,6 +68,7 @@ class OrderService:
             total_amount=total,
         )
         self._create_items(order, data.items, products)
+        transaction.on_commit(lambda: notify_new_order(order))
         return order
 
     # ----------------------------------------------------------------- #
@@ -77,6 +79,10 @@ class OrderService:
         if data.delivery_type == DeliveryType.DELIVERY:
             if not data.address.strip():
                 errors["address"] = "Укажите адрес доставки."
+            if not data.customer_name.strip():
+                errors["customer_name"] = "Укажите имя."
+            if not data.phone.strip():
+                errors["phone"] = "Укажите телефон."
         elif data.delivery_type == DeliveryType.PICKUP:
             if not data.customer_name.strip():
                 errors["customer_name"] = "Укажите имя."

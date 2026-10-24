@@ -186,7 +186,7 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
               </div>
 
               <div className="mt-stack-lg space-y-4">
-                {deliveryType === "delivery" ? (
+                {deliveryType === "delivery" && (
                   <Input
                     label="Адрес доставки"
                     placeholder="Улица, дом, квартира"
@@ -194,23 +194,21 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
                     error={errors.address?.message}
                     {...register("address")}
                   />
-                ) : (
-                  <>
-                    <Input
-                      label="Имя"
-                      placeholder="Ваше имя"
-                      error={errors.customerName?.message}
-                      {...register("customerName")}
-                    />
-                    <Input
-                      label="Телефон"
-                      type="tel"
-                      placeholder="+996 000 000 000"
-                      error={errors.phone?.message}
-                      {...register("phone")}
-                    />
-                  </>
                 )}
+
+                <Input
+                  label="Имя"
+                  placeholder="Ваше имя"
+                  error={errors.customerName?.message}
+                  {...register("customerName")}
+                />
+                <Input
+                  label="Телефон"
+                  type="tel"
+                  placeholder="+996 000 000 000"
+                  error={errors.phone?.message}
+                  {...register("phone")}
+                />
 
                 <Textarea
                   label="Комментарий"

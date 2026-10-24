@@ -25,17 +25,18 @@ export function buildWhatsAppMessage(data: WhatsAppOrderData): string {
   lines.push(data.deliveryType === "delivery" ? "Доставка" : "Самовывоз");
   lines.push("");
 
+  lines.push("Имя:");
+  lines.push(data.customerName?.trim() || "—");
+  lines.push("");
+  lines.push("Телефон:");
+  lines.push(data.phone?.trim() || "—");
+  lines.push("");
+
   if (data.deliveryType === "delivery") {
     lines.push("Адрес:");
     lines.push(data.address?.trim() || "—");
-  } else {
-    lines.push("Имя:");
-    lines.push(data.customerName?.trim() || "—");
     lines.push("");
-    lines.push("Телефон:");
-    lines.push(data.phone?.trim() || "—");
   }
-  lines.push("");
 
   if (data.comment?.trim()) {
     lines.push("Комментарий:");
