@@ -18,6 +18,10 @@ class OrderViewSet(
     """Create a new order, or fetch one by its UUID for status display."""
 
     permission_classes = [AllowAny]
+    # Public, unauthenticated endpoint: skip SessionAuthentication entirely so
+    # a customer who also happens to have an active admin session in the same
+    # browser doesn't get hit with CSRF enforcement ("CSRF token missing").
+    authentication_classes = []
     queryset = Order.objects.prefetch_related("items").all()
     throttle_classes = [ScopedRateThrottle]
     throttle_scope = "orders"
