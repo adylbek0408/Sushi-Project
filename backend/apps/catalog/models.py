@@ -62,9 +62,17 @@ class Product(TimeStampedModel):
     name = models.CharField("Название", max_length=160)
     slug = models.SlugField("Слаг", max_length=180, unique=True, blank=True)
     description = models.TextField("Состав / описание", blank=True)
-    price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
+    price = models.DecimalField(
+        "Цена (если нет вариантов порций)",
+        max_digits=10,
+        decimal_places=2,
+        help_text="Игнорируется, если ниже добавлен хотя бы один вариант порции.",
+    )
     weight = models.PositiveIntegerField(
-        "Вес, г", null=True, blank=True, help_text="Граммовка порции."
+        "Вес, г (если нет вариантов порций)",
+        null=True,
+        blank=True,
+        help_text="Граммовка порции. Игнорируется, если добавлены варианты порций.",
     )
     image = models.ImageField("Изображение", upload_to="products/", blank=True)
     is_active = models.BooleanField("В продаже", default=True)

@@ -59,6 +59,22 @@ class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     list_select_related = ("category",)
     inlines = [ProductVariantInline]
+    fieldsets = (
+        (None, {"fields": ("category", "name", "slug", "description", "image")}),
+        (
+            "Цена без вариантов",
+            {
+                "fields": ("price", "weight"),
+                "description": (
+                    "Используются, только если у товара НЕТ вариантов порций ниже. "
+                    "Если вы добавите хотя бы один вариант во вкладке «Варианты порций» — "
+                    "эти поля полностью игнорируются, цену и вес покупатель увидит из "
+                    "выбранного варианта."
+                ),
+            },
+        ),
+        ("Публикация", {"fields": ("is_active", "is_popular", "sort_order")}),
+    )
 
     @admin.display(description="Фото")
     def preview(self, obj: Product):
