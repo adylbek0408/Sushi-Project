@@ -5,7 +5,7 @@ from decimal import Decimal
 
 from django.db import models
 
-from apps.catalog.models import Product
+from apps.catalog.models import Product, ProductVariant
 from apps.core.models import TimeStampedModel
 
 
@@ -74,6 +74,14 @@ class OrderItem(TimeStampedModel):
         on_delete=models.SET_NULL,
         null=True,
         verbose_name="Товар",
+    )
+    variant = models.ForeignKey(
+        ProductVariant,
+        related_name="order_items",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name="Вариант порции",
     )
     # Snapshots — keep history stable even if the product later changes.
     product_name = models.CharField("Название", max_length=160)

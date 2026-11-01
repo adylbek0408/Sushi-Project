@@ -8,8 +8,8 @@ class OrderItemInline(admin.TabularInline):
     model = OrderItem
     extra = 0
     can_delete = False
-    readonly_fields = ("product_name", "price", "quantity", "line_total")
-    fields = ("product_name", "price", "quantity", "line_total")
+    readonly_fields = ("product_name", "variant", "price", "quantity", "line_total")
+    fields = ("product_name", "variant", "price", "quantity", "line_total")
 
     @admin.display(description="Сумма")
     def line_total(self, obj: OrderItem):

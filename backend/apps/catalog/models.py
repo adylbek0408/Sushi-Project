@@ -99,6 +99,35 @@ class Product(TimeStampedModel):
         return slug
 
 
+class ProductVariant(TimeStampedModel):
+    """A sellable portion size of a product (e.g. Стандарт 200г / Большой 400г).
+
+    A product with no variants is sold directly at its own price/weight
+    (unchanged, backward-compatible). Once a product has active variants,
+    those become the orderable units and drive price/weight shown to
+    customers.
+    """
+
+    product = models.ForeignKey(
+        Product, related_name="variants", on_delete=models.CASCADE, verbose_name="Товар"
+    )
+    label = models.CharField(
+        "Название порции", max_length=60, help_text="Например: Стандарт, Большой"
+    )
+    weight = models.PositiveIntegerField("Вес, г", null=True, blank=True)
+    price = models.DecimalField("Цена", max_digits=10, decimal_places=2)
+    sort_order = models.PositiveIntegerField("Порядок", default=0)
+    is_active = models.BooleanField("Активен", default=True)
+
+    class Meta:
+        verbose_name = "Вариант порции"
+        verbose_name_plural = "Варианты порций"
+        ordering = ["sort_order", "price"]
+
+    def __str__(self) -> str:
+        return f"{self.product.name} — {self.label}"
+
+
 class BannerQuerySet(models.QuerySet):
     def active(self) -> "BannerQuerySet":
         return self.filter(is_active=True)

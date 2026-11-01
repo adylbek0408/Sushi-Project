@@ -12,7 +12,7 @@ from typing import Iterable
 
 from django.db import transaction
 
-from apps.catalog.models import Product
+from apps.catalog.models import Product, ProductVariant
 from apps.core.models import ShopSettings
 
 from .models import DeliveryType, Order, OrderItem
@@ -31,6 +31,7 @@ class OrderValidationError(Exception):
 class OrderItemInput:
     product_id: str
     quantity: int
+    variant_id: str | None = None
 
 
 @dataclass(frozen=True)
@@ -56,7 +57,8 @@ class OrderService:
 
         self._validate_contact(data)
         products = self._load_products(data.items)
-        total = self._compute_total(data.items, products)
+        variants = self._load_variants(data.items, products)
+        total = self._compute_total(data.items, products, variants)
         self._validate_minimum(total)
 
         order = Order.objects.create(
@@ -67,7 +69,7 @@ class OrderService:
             comment=data.comment.strip(),
             total_amount=total,
         )
-        self._create_items(order, data.items, products)
+        self._create_items(order, data.items, products, variants)
         transaction.on_commit(lambda: notify_new_order(order))
         return order
 
@@ -101,7 +103,7 @@ class OrderService:
         ids = {item.product_id for item in items}
         products = {
             str(p.id): p
-            for p in Product.objects.active().filter(id__in=ids)
+            for p in Product.objects.active().prefetch_related("variants").filter(id__in=ids)
         }
         missing = ids - set(products)
         if missing:
@@ -110,12 +112,52 @@ class OrderService:
             )
         return products
 
-    def _compute_total(
+    def _load_variants(
         self, items: Iterable[OrderItemInput], products: dict[str, Product]
+    ) -> dict[str, ProductVariant]:
+        """Validates variant selection and returns {variant_id: variant}.
+
+        A product with active variants *requires* one to be picked; a
+        product with none must not be given one (nothing to pick from).
+        """
+        variant_ids = {item.variant_id for item in items if item.variant_id}
+        variants = {
+            str(v.id): v
+            for v in ProductVariant.objects.filter(id__in=variant_ids, is_active=True)
+        }
+        missing = variant_ids - set(variants)
+        if missing:
+            raise OrderValidationError(
+                {"items": f"Некоторые варианты порций недоступны: {', '.join(sorted(missing))}."}
+            )
+
+        errors: dict[str, str] = {}
+        for item in items:
+            product = products[item.product_id]
+            has_variants = any(v.is_active for v in product.variants.all())
+            if has_variants and not item.variant_id:
+                errors["items"] = f"Выберите размер порции для «{product.name}»."
+            elif item.variant_id and variants[item.variant_id].product_id != product.id:
+                errors["items"] = f"Вариант порции не относится к «{product.name}»."
+        if errors:
+            raise OrderValidationError(errors)
+
+        return variants
+
+    def _compute_total(
+        self,
+        items: Iterable[OrderItemInput],
+        products: dict[str, Product],
+        variants: dict[str, ProductVariant],
     ) -> Decimal:
         total = Decimal("0")
         for item in items:
-            total += products[item.product_id].price * item.quantity
+            unit_price = (
+                variants[item.variant_id].price
+                if item.variant_id
+                else products[item.product_id].price
+            )
+            total += unit_price * item.quantity
         if not self._settings.delivery_is_free:
             total += self._settings.delivery_fee
         return total
@@ -136,16 +178,20 @@ class OrderService:
         order: Order,
         items: Iterable[OrderItemInput],
         products: dict[str, Product],
+        variants: dict[str, ProductVariant],
     ) -> None:
-        OrderItem.objects.bulk_create(
-            [
-                OrderItem(
-                    order=order,
-                    product=products[item.product_id],
-                    product_name=products[item.product_id].name,
-                    price=products[item.product_id].price,
-                    quantity=item.quantity,
-                )
-                for item in items
-            ]
-        )
+        def build(item: OrderItemInput) -> OrderItem:
+            product = products[item.product_id]
+            variant = variants[item.variant_id] if item.variant_id else None
+            name = f"{product.name} ({variant.label})" if variant else product.name
+            price = variant.price if variant else product.price
+            return OrderItem(
+                order=order,
+                product=product,
+                variant=variant,
+                product_name=name,
+                price=price,
+                quantity=item.quantity,
+            )
+
+        OrderItem.objects.bulk_create([build(item) for item in items])

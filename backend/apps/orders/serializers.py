@@ -7,6 +7,7 @@ from .services import OrderInput, OrderItemInput
 
 class OrderItemInputSerializer(serializers.Serializer):
     product_id = serializers.UUIDField()
+    variant_id = serializers.UUIDField(required=False, allow_null=True)
     quantity = serializers.IntegerField(min_value=1, max_value=99)
 
 
@@ -25,7 +26,11 @@ class OrderCreateSerializer(serializers.Serializer):
         return OrderInput(
             delivery_type=data["delivery_type"],
             items=[
-                OrderItemInput(product_id=str(i["product_id"]), quantity=i["quantity"])
+                OrderItemInput(
+                    product_id=str(i["product_id"]),
+                    variant_id=str(i["variant_id"]) if i.get("variant_id") else None,
+                    quantity=i["quantity"],
+                )
                 for i in data["items"]
             ],
             customer_name=data.get("customer_name", ""),

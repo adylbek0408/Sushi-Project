@@ -33,4 +33,4 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = ProductFilter
     search_fields = ["name", "description"]
     ordering_fields = ["price", "sort_order", "created_at"]
-    queryset = Product.objects.active().select_related("category")
+    queryset = Product.objects.active().select_related("category").prefetch_related("variants")

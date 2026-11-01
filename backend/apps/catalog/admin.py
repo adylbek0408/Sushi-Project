@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.utils.html import format_html
 
-from .models import Banner, Category, Product
+from .models import Banner, Category, Product, ProductVariant
 
 
 class ProductInline(admin.TabularInline):
@@ -9,6 +9,12 @@ class ProductInline(admin.TabularInline):
     extra = 0
     fields = ("name", "price", "weight", "is_active", "is_popular", "sort_order")
     show_change_link = True
+
+
+class ProductVariantInline(admin.TabularInline):
+    model = ProductVariant
+    extra = 1
+    fields = ("label", "weight", "price", "sort_order", "is_active")
 
 
 @admin.register(Category)
@@ -52,6 +58,7 @@ class ProductAdmin(admin.ModelAdmin):
     autocomplete_fields = ("category",)
     prepopulated_fields = {"slug": ("name",)}
     list_select_related = ("category",)
+    inlines = [ProductVariantInline]
 
     @admin.display(description="Фото")
     def preview(self, obj: Product):
