@@ -12,7 +12,7 @@ import { formatPrice } from "@/lib/format";
 import { config, mediaUrl } from "@/lib/config";
 import type { Product } from "@/types";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 export const dynamicParams = true;
 
 interface PageProps {

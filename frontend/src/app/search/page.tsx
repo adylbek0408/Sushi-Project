@@ -3,6 +3,8 @@ import { StorefrontShell } from "@/components/layout/StorefrontShell";
 import { SearchView } from "@/components/search/SearchView";
 import { getSettingsSafe } from "@/lib/api/server";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Поиск",
   robots: { index: false, follow: false },

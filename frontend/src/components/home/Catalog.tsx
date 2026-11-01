@@ -6,6 +6,7 @@ import { ProductCard } from "./ProductCard";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Icon } from "@/components/ui/Icon";
 import { useCategories, useProducts } from "@/hooks/useCatalog";
+import { useSessionBootstrapData } from "@/hooks/useSessionBootstrapData";
 import { useCatalogStore } from "@/store/catalog";
 import type { Category, Product, ShopSettings } from "@/types";
 
@@ -19,10 +20,14 @@ export function Catalog({ initialCategories, initialProducts, settings }: Catalo
   const selectedSlug = useCatalogStore((s) => s.selectedSlug);
   const setSelectedSlug = useCatalogStore((s) => s.setSelectedSlug);
 
-  const { data: categories = initialCategories } = useCategories(initialCategories);
+  // First tab visit → seed from SSR. Reload in same tab → session cache wins.
+  const bootCategories = useSessionBootstrapData(initialCategories);
+  const bootProducts = useSessionBootstrapData(initialProducts);
+
+  const { data: categories = initialCategories } = useCategories(bootCategories);
   const { data: products, isFetching } = useProducts(
     selectedSlug ? { category: selectedSlug } : {},
-    selectedSlug ? undefined : initialProducts,
+    selectedSlug ? undefined : bootProducts,
   );
 
   const heading = useMemo(() => {

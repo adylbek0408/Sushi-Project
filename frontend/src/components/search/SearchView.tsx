@@ -20,7 +20,6 @@ export function SearchView({ settings }: SearchViewProps) {
     queryKey: ["search", trimmed],
     queryFn: () => catalogApi.getProducts({ search: trimmed }),
     enabled: trimmed.length >= 2,
-    staleTime: 60 * 1000,
   });
 
   return (

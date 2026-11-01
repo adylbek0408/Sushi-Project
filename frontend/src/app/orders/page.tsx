@@ -3,6 +3,8 @@ import { StorefrontShell } from "@/components/layout/StorefrontShell";
 import { OrderHistoryList } from "@/components/orders/OrderHistoryList";
 import { getSettingsSafe } from "@/lib/api/server";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Мои заказы",
   robots: { index: false, follow: false },

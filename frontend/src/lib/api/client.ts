@@ -21,13 +21,16 @@ interface RequestOptions extends Omit<RequestInit, "body"> {
   body?: unknown;
   /** Next.js fetch cache/revalidate hints (ignored client-side). */
   next?: { revalidate?: number; tags?: string[] };
+  /** Prefer `no-store` so responses are not shared across users in the Data Cache. */
+  cache?: RequestCache;
 }
 
 async function request<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const { body, headers, next, ...rest } = options;
+  const { body, headers, next, cache, ...rest } = options;
 
   const response = await fetch(apiUrl(path), {
     ...rest,
+    cache,
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
