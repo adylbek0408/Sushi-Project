@@ -92,8 +92,17 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
         createdAt: order.created_at,
       });
 
-      // Open WhatsApp after the order is safely persisted.
-      window.open(url, "_blank", "noopener,noreferrer");
+      // On mobile, a full navigation hands off to the WhatsApp app more
+      // reliably than window.open (whose new-tab context sometimes just
+      // shows wa.me's landing page instead of deep-linking). Desktop has
+      // no app to deep-link into anyway, so keep opening a new tab there
+      // and leave the storefront tab on /orders.
+      const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+      if (isMobile) {
+        window.location.href = url;
+      } else {
+        window.open(url, "_blank", "noopener,noreferrer");
+      }
 
       clearCart();
       closeCheckout();
