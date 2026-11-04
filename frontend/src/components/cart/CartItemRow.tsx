@@ -1,10 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import { Icon } from "@/components/ui/Icon";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
+import { CartThumb } from "./CartThumb";
 import { formatPrice } from "@/lib/format";
-import { mediaUrl } from "@/lib/config";
 import { useCartStore, type CartItem } from "@/store/cart";
 
 interface CartItemRowProps {
@@ -16,39 +15,26 @@ export function CartItemRow({ item, currency }: CartItemRowProps) {
   const increment = useCartStore((s) => s.increment);
   const decrement = useCartStore((s) => s.decrement);
   const removeItem = useCartStore((s) => s.removeItem);
-  const image = mediaUrl(item.image);
 
   return (
-    <div className="flex items-center gap-3 rounded-2xl bg-surface-container-low p-3">
-      <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface-container">
-        {image ? (
-          <Image
-            src={image}
-            alt={item.name}
-            width={64}
-            height={64}
-            className="h-full w-full object-cover"
-          />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <Icon name="ramen_dining" className="text-secondary" />
-          </div>
-        )}
-      </div>
+    <div className="flex items-center gap-3 rounded-2xl bg-surface-container-low p-2.5 pr-3">
+      <CartThumb src={item.image} alt={item.name} />
 
       <div className="min-w-0 flex-1">
-        <h3 className="truncate font-headline-md text-[16px] text-on-surface">
+        <h3 className="line-clamp-2 font-headline-md text-[15px] leading-tight text-on-surface">
           {item.name}
         </h3>
         {item.variantLabel ? (
-          <p className="font-label-md text-label-sm text-secondary">
+          <p className="mt-0.5 font-label-md text-label-sm text-secondary">
             Порция: {item.variantLabel}
             {item.weight ? ` · ${item.weight} г` : ""}
           </p>
         ) : item.weight ? (
-          <p className="font-label-md text-label-sm text-secondary">{item.weight} г</p>
+          <p className="mt-0.5 font-label-md text-label-sm text-secondary">
+            {item.weight} г
+          </p>
         ) : null}
-        <p className="font-body-md text-secondary">
+        <p className="mt-1 font-body-md font-medium text-on-surface">
           {formatPrice(item.price * item.quantity, currency)}
         </p>
       </div>

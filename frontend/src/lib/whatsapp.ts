@@ -5,7 +5,10 @@ import { formatPrice } from "./format";
 export interface WhatsAppOrderData {
   deliveryType?: DeliveryType;
   items: CartItem[];
+  /** Final amount after discount (what the customer pays for food). */
   total: number;
+  subtotal?: number;
+  discountPercent?: number;
   currency: string;
   address?: string;
   customerName?: string;
@@ -49,8 +52,14 @@ export function buildWhatsAppMessage(data: WhatsAppOrderData): string {
   }
   lines.push("");
 
-  lines.push("Итого:");
-  lines.push(formatPrice(data.total, data.currency));
+  if (data.discountPercent && data.discountPercent > 0 && data.subtotal != null) {
+    lines.push(`Сумма без скидки: ${formatPrice(data.subtotal, data.currency)}`);
+    lines.push(`Скидка: ${data.discountPercent}%`);
+    lines.push(`Итого со скидкой: ${formatPrice(data.total, data.currency)}`);
+  } else {
+    lines.push("Итого:");
+    lines.push(formatPrice(data.total, data.currency));
+  }
 
   return lines.join("\n");
 }

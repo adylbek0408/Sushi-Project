@@ -14,11 +14,21 @@ export interface CartItem {
   image: string | null;
   weight: number | null;
   quantity: number;
+  /** Addon (salad/drink) — excluded from volume-discount portions. */
+  isAddon: boolean;
+}
+
+export interface AddItemOptions {
+  isAddon?: boolean;
 }
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: Product, variant?: ProductVariant | null) => void;
+  addItem: (
+    product: Product,
+    variant?: ProductVariant | null,
+    options?: AddItemOptions,
+  ) => void;
   increment: (id: string) => void;
   decrement: (id: string) => void;
   removeItem: (id: string) => void;
@@ -30,10 +40,11 @@ export const useCartStore = create<CartState>()(
     (set) => ({
       items: [],
 
-      addItem: (product, variant = null) =>
+      addItem: (product, variant = null, options) =>
         set((state) => {
           const chosen = variant ?? null;
           const lineId = cartLineId(product.id, chosen?.id);
+          const isAddon = Boolean(options?.isAddon);
           const existing = state.items.find((item) => item.id === lineId);
           if (existing) {
             return {
@@ -58,6 +69,7 @@ export const useCartStore = create<CartState>()(
                 image: product.image,
                 weight: resolveWeight(product, chosen),
                 quantity: 1,
+                isAddon,
               },
             ],
           };
@@ -88,8 +100,17 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "sushiya-cart",
-      // v2: productId + variantId on each line (old cart shape is incompatible).
-      version: 2,
+      version: 3,
+      migrate: (persisted) => {
+        const state = (persisted ?? { items: [] }) as CartState;
+        return {
+          ...state,
+          items: (state.items ?? []).map((item) => ({
+            ...item,
+            isAddon: Boolean(item.isAddon),
+          })),
+        };
+      },
     },
   ),
 );
@@ -99,3 +120,9 @@ export const selectTotalCount = (state: CartState): number =>
 
 export const selectTotalAmount = (state: CartState): number =>
   state.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+/** Portions that count toward volume discount (main dishes only). */
+export const selectDiscountablePortions = (state: CartState): number =>
+  state.items
+    .filter((item) => !item.isAddon)
+    .reduce((sum, item) => sum + item.quantity, 0);

@@ -4,6 +4,8 @@ export interface Category {
   slug: string;
   image: string | null;
   sort_order: number;
+  /** When true, products belong in the cart «Добавить к заказу» strip. */
+  is_addon?: boolean;
 }
 
 export interface Banner {

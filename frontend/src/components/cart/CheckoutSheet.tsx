@@ -7,13 +7,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Icon } from "@/components/ui/Icon";
 import { Input, Textarea } from "@/components/ui/Input";
 import { CartItemRow } from "./CartItemRow";
+import { CartAddons } from "./CartAddons";
+import { CartDiscountSummary } from "./CartDiscountSummary";
 import { checkoutSchema, type CheckoutFormValues } from "./checkoutSchema";
-import { useCartStore, selectTotalAmount } from "@/store/cart";
+import { useCartStore, selectTotalCount } from "@/store/cart";
 import { useUiStore } from "@/store/ui";
 import { useOrderHistoryStore } from "@/store/orderHistory";
 import { useHydrated } from "@/hooks/useHydrated";
 import { useCreateOrder } from "@/hooks/useCreateOrder";
-import { formatPrice } from "@/lib/format";
+import { calcCartPricing } from "@/lib/discount";
 import { buildWhatsAppMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
 import { ApiError } from "@/lib/api/client";
 import type { ShopSettings } from "@/types";
@@ -26,7 +28,7 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
   const isOpen = useUiStore((s) => s.isCheckoutOpen);
   const closeCheckout = useUiStore((s) => s.closeCheckout);
   const items = useCartStore((s) => s.items);
-  const total = useCartStore(selectTotalAmount);
+  const portionCount = useCartStore(selectTotalCount);
   const clearCart = useCartStore((s) => s.clear);
   const addToHistory = useOrderHistoryStore((s) => s.addOrder);
   const hydrated = useHydrated();
@@ -69,10 +71,13 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
         comment: values.comment?.trim() || undefined,
       });
 
+      const pricing = calcCartPricing(items);
       const message = buildWhatsAppMessage({
         deliveryType: "delivery",
         items,
-        total: Number(order.total_amount),
+        total: pricing.discountedSubtotal,
+        subtotal: pricing.subtotal,
+        discountPercent: pricing.discountPercent,
         currency: settings.currency,
         address: values.address,
         customerName: values.customerName,
@@ -85,9 +90,9 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
         id: order.id,
         number: order.number,
         deliveryType: "delivery",
-        total: order.total_amount,
+        total: String(pricing.discountedSubtotal),
         currency: settings.currency,
-        itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
+        itemCount: portionCount,
         createdAt: order.created_at,
       });
 
@@ -174,11 +179,12 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
                 ))}
               </div>
 
-              <div className="mt-stack-lg flex items-center justify-between border-t border-dashed border-outline-variant pt-4">
-                <span className="font-headline-md text-on-surface-variant">Итого</span>
-                <span className="font-headline-lg-mobile text-headline-lg-mobile text-primary">
-                  {formatPrice(total, settings.currency)}
-                </span>
+              <div className="mt-stack-lg">
+                <CartAddons currency={settings.currency} />
+              </div>
+
+              <div className="mt-stack-lg border-t border-dashed border-outline-variant pt-4">
+                <CartDiscountSummary items={items} currency={settings.currency} />
               </div>
 
               <div className="mt-stack-lg space-y-4">

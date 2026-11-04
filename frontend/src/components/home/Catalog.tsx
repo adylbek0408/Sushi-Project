@@ -31,11 +31,22 @@ export function Catalog({ initialCategories, initialProducts, settings }: Catalo
     initialProducts,
   );
 
+  // Addon categories (salads/drinks) live in the cart upsell strip, not the main menu.
+  const menuCategories = useMemo(
+    () => categories.filter((c) => !c.is_addon),
+    [categories],
+  );
+
+  const menuProducts = useMemo(() => {
+    const addonSlugs = new Set(categories.filter((c) => c.is_addon).map((c) => c.slug));
+    return allProducts.filter((p) => !addonSlugs.has(p.category));
+  }, [allProducts, categories]);
+
   /** "Все" → sections by category; single tab → one section. */
   const sections = useMemo((): ProductSection[] => {
     if (selectedSlug) {
-      const category = categories.find((c) => c.slug === selectedSlug);
-      const products = allProducts.filter((p) => p.category === selectedSlug);
+      const category = menuCategories.find((c) => c.slug === selectedSlug);
+      const products = menuProducts.filter((p) => p.category === selectedSlug);
       return [
         {
           slug: selectedSlug,
@@ -46,14 +57,14 @@ export function Catalog({ initialCategories, initialProducts, settings }: Catalo
     }
 
     const bySlug = new Map<string, Product[]>();
-    for (const product of allProducts) {
+    for (const product of menuProducts) {
       const list = bySlug.get(product.category) ?? [];
       list.push(product);
       bySlug.set(product.category, list);
     }
 
     const ordered: ProductSection[] = [];
-    for (const category of categories) {
+    for (const category of menuCategories) {
       const products = bySlug.get(category.slug);
       if (!products?.length) continue;
       ordered.push({
@@ -64,7 +75,6 @@ export function Catalog({ initialCategories, initialProducts, settings }: Catalo
       bySlug.delete(category.slug);
     }
 
-    // Products whose category is missing from the active list
     for (const [slug, products] of bySlug) {
       if (!products.length) continue;
       ordered.push({
@@ -75,14 +85,14 @@ export function Catalog({ initialCategories, initialProducts, settings }: Catalo
     }
 
     return ordered;
-  }, [allProducts, categories, selectedSlug]);
+  }, [menuProducts, menuCategories, selectedSlug]);
 
   const isEmpty = sections.every((section) => section.products.length === 0);
 
   return (
     <>
       <CategoryScroller
-        categories={categories}
+        categories={menuCategories}
         selectedSlug={selectedSlug}
         onSelect={setSelectedSlug}
       />

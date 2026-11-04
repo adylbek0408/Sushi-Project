@@ -1,12 +1,13 @@
 "use client";
 
-import Image from "next/image";
 import { Icon } from "@/components/ui/Icon";
-import { useCartStore, selectTotalAmount, selectTotalCount } from "@/store/cart";
+import { CartAddons } from "./CartAddons";
+import { CartDiscountSummary } from "./CartDiscountSummary";
+import { CartThumb } from "./CartThumb";
+import { useCartStore, selectTotalCount } from "@/store/cart";
 import { useUiStore } from "@/store/ui";
 import { useHydrated } from "@/hooks/useHydrated";
 import { formatPrice } from "@/lib/format";
-import { mediaUrl } from "@/lib/config";
 import type { ShopSettings } from "@/types";
 
 interface CartSidebarProps {
@@ -19,7 +20,6 @@ export function CartSidebar({ settings }: CartSidebarProps) {
   const increment = useCartStore((s) => s.increment);
   const decrement = useCartStore((s) => s.decrement);
   const removeItem = useCartStore((s) => s.removeItem);
-  const total = useCartStore(selectTotalAmount);
   const count = useCartStore(selectTotalCount);
   const openCheckout = useUiStore((s) => s.openCheckout);
   const hydrated = useHydrated();
@@ -33,84 +33,78 @@ export function CartSidebar({ settings }: CartSidebarProps) {
         </h2>
       </div>
 
-      <div className="no-scrollbar flex-1 space-y-6 overflow-y-auto p-6">
+      <div className="no-scrollbar flex-1 space-y-5 overflow-y-auto p-6">
         {!hydrated || count === 0 ? (
           <div className="flex flex-col items-center gap-2 py-16 text-center">
             <Icon name="shopping_cart" className="text-4xl text-secondary" />
             <p className="font-body-md text-secondary">Корзина пуста</p>
           </div>
         ) : (
-          items.map((item) => (
-            <div key={item.id} className="flex gap-4">
-              <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface-container">
-                {mediaUrl(item.image) ? (
-                  <Image
-                    src={mediaUrl(item.image) as string}
-                    alt={item.name}
-                    width={64}
-                    height={64}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center">
-                    <Icon name="ramen_dining" className="text-secondary" />
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <h4 className="font-body-md font-medium">{item.name}</h4>
-                    {item.variantLabel ? (
-                      <p className="text-xs text-on-surface-variant">
-                        Порция: {item.variantLabel}
-                        {item.weight ? ` · ${item.weight} г` : ""}
-                      </p>
-                    ) : item.weight ? (
-                      <p className="text-xs text-on-surface-variant">{item.weight} г</p>
-                    ) : null}
-                  </div>
-                  <button
-                    type="button"
-                    aria-label={`Удалить ${item.name} из корзины`}
-                    onClick={() => removeItem(item.id)}
-                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-secondary transition-colors hover:bg-error-container hover:text-error active:scale-90"
-                  >
-                    <Icon name="delete" className="text-[18px]" />
-                  </button>
-                </div>
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="text-sm text-on-surface-variant">
-                    {formatPrice(item.price * item.quantity, settings.currency)}
-                  </span>
-                  <div className="flex items-center gap-3 rounded-full bg-surface-container px-2 py-1">
+          <>
+            {items.map((item) => (
+              <div key={item.id} className="flex gap-3">
+                <CartThumb src={item.image} alt={item.name} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <h4 className="line-clamp-2 font-body-md font-medium leading-snug">
+                        {item.name}
+                      </h4>
+                      {item.variantLabel ? (
+                        <p className="text-xs text-on-surface-variant">
+                          Порция: {item.variantLabel}
+                          {item.weight ? ` · ${item.weight} г` : ""}
+                        </p>
+                      ) : item.weight ? (
+                        <p className="text-xs text-on-surface-variant">
+                          {item.weight} г
+                        </p>
+                      ) : null}
+                    </div>
                     <button
                       type="button"
-                      aria-label="Уменьшить"
-                      onClick={() => decrement(item.id)}
-                      className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-container-highest text-xs transition-colors hover:bg-surface-variant"
+                      aria-label={`Удалить ${item.name} из корзины`}
+                      onClick={() => removeItem(item.id)}
+                      className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-secondary transition-colors hover:bg-error-container hover:text-error active:scale-90"
                     >
-                      −
+                      <Icon name="delete" className="text-[18px]" />
                     </button>
-                    <span className="text-sm font-medium">{item.quantity}</span>
-                    <button
-                      type="button"
-                      aria-label="Увеличить"
-                      onClick={() => increment(item.id)}
-                      className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-container-highest text-xs transition-colors hover:bg-surface-variant"
-                    >
-                      +
-                    </button>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="text-sm font-medium text-on-surface">
+                      {formatPrice(item.price * item.quantity, settings.currency)}
+                    </span>
+                    <div className="flex items-center gap-3 rounded-full bg-surface-container px-2 py-1">
+                      <button
+                        type="button"
+                        aria-label="Уменьшить"
+                        onClick={() => decrement(item.id)}
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-container-highest text-xs transition-colors hover:bg-surface-variant"
+                      >
+                        −
+                      </button>
+                      <span className="text-sm font-medium">{item.quantity}</span>
+                      <button
+                        type="button"
+                        aria-label="Увеличить"
+                        onClick={() => increment(item.id)}
+                        className="flex h-6 w-6 items-center justify-center rounded-full bg-surface-container-highest text-xs transition-colors hover:bg-surface-variant"
+                      >
+                        +
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))
+            ))}
+
+            <CartAddons currency={settings.currency} />
+          </>
         )}
       </div>
 
       <div className="border-t border-surface-variant p-6 pb-8">
-        <div className="mb-6 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <span className="text-body-lg text-on-surface-variant">Доставка</span>
           <span className="font-medium">
             {settings.delivery_is_free
@@ -118,11 +112,8 @@ export function CartSidebar({ settings }: CartSidebarProps) {
               : formatPrice(settings.delivery_fee, settings.currency)}
           </span>
         </div>
-        <div className="mb-8 flex items-center justify-between">
-          <span className="font-headline-md text-headline-md">Итого:</span>
-          <span className="font-headline-lg text-headline-lg text-primary">
-            {formatPrice(total, settings.currency)}
-          </span>
+        <div className="mb-6">
+          <CartDiscountSummary items={items} currency={settings.currency} />
         </div>
         <button
           type="button"
