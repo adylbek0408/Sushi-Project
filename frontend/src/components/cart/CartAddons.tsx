@@ -135,6 +135,7 @@ function AddonCard({
       className="flex w-[140px] shrink-0 flex-col overflow-hidden rounded-2xl bg-white text-left shadow-sm ring-1 ring-black/5 transition-transform active:scale-[0.97]"
     >
       <div className="relative aspect-square overflow-hidden bg-white">
+        {/* Orange splash — temporarily disabled
         <div className="absolute inset-[4%]" aria-hidden>
           <Image
             src="/dish-bg.png"
@@ -144,6 +145,7 @@ function AddonCard({
             className="object-contain object-center"
           />
         </div>
+        */}
         {image ? (
           <div className="absolute inset-[10%]">
             <Image

@@ -25,6 +25,7 @@ export function CartThumb({ src, alt, className }: CartThumbProps) {
         className,
       )}
     >
+      {/* Orange splash — temporarily disabled
       <div className="absolute inset-[4%]" aria-hidden>
         <Image
           src={DISH_BG}
@@ -34,6 +35,7 @@ export function CartThumb({ src, alt, className }: CartThumbProps) {
           className="object-contain object-center"
         />
       </div>
+      */}
       {image ? (
         <div className="absolute inset-[10%]">
           <Image

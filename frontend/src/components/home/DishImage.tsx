@@ -58,6 +58,7 @@ export function DishImage({
         className,
       )}
     >
+      {/* Orange splash — temporarily disabled
       <div className={frame.splash} aria-hidden>
         <Image
           src={DISH_BG}
@@ -68,6 +69,7 @@ export function DishImage({
           priority={priority}
         />
       </div>
+      */}
 
       {src ? (
         <div
