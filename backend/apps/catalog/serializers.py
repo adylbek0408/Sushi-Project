@@ -18,7 +18,7 @@ class RelativeImageMixin(serializers.Serializer):
 class CategorySerializer(RelativeImageMixin, serializers.ModelSerializer):
     class Meta:
         model = Category
-        fields = ["id", "name", "slug", "image", "sort_order"]
+        fields = ["id", "name", "slug", "image", "sort_order", "is_addon"]
         read_only_fields = fields
 
 

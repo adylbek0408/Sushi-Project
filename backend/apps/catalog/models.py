@@ -18,6 +18,14 @@ class Category(TimeStampedModel):
     image = models.ImageField("Изображение", upload_to="categories/", blank=True)
     sort_order = models.PositiveIntegerField("Порядок", default=0, db_index=True)
     is_active = models.BooleanField("Активна", default=True)
+    is_addon = models.BooleanField(
+        "Доп. товары (показывать в корзине)",
+        default=False,
+        help_text=(
+            "Товары этой категории будут предложены в корзине/оформлении заказа "
+            "(«Добавить к заказу»), в дополнение к обычному показу в меню."
+        ),
+    )
 
     objects = CategoryQuerySet.as_manager()
 

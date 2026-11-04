@@ -19,12 +19,13 @@ class ProductVariantInline(admin.TabularInline):
 
 @admin.register(Category)
 class CategoryAdmin(admin.ModelAdmin):
-    list_display = ("name", "preview", "sort_order", "product_count", "is_active")
+    list_display = ("name", "preview", "sort_order", "product_count", "is_active", "is_addon")
     list_editable = ("sort_order", "is_active")
-    list_filter = ("is_active",)
+    list_filter = ("is_active", "is_addon")
     search_fields = ("name",)
     prepopulated_fields = {"slug": ("name",)}
     inlines = [ProductInline]
+    fields = ("name", "slug", "image", "sort_order", "is_active", "is_addon")
 
     @admin.display(description="Превью")
     def preview(self, obj: Category):
