@@ -36,7 +36,7 @@ export function ProductCard({ product, currency }: ProductCardProps) {
           src={image}
           alt={product.name}
           zoomOnHover
-          className="m-2 mb-0 rounded-t-[20px] md:m-0 md:rounded-none"
+          className="rounded-t-[20px] md:rounded-none"
           sizes="(max-width: 768px) 50vw, (max-width: 1280px) 25vw, 320px"
         />
 

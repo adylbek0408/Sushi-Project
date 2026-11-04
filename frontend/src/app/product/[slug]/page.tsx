@@ -86,7 +86,8 @@ export default async function ProductPage({ params }: PageProps) {
             src={mediaUrl(product.image)}
             alt={product.name}
             priority
-            className="rounded-3xl"
+            size="detail"
+            className="-mx-margin-mobile rounded-none md:mx-0 md:rounded-3xl"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
 

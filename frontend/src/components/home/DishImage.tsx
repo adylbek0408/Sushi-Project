@@ -2,6 +2,8 @@ import Image from "next/image";
 import { Icon } from "@/components/ui/Icon";
 import { clsx } from "@/lib/clsx";
 
+type DishImageSize = "card" | "detail";
+
 interface DishImageProps {
   src: string | null;
   alt: string;
@@ -11,9 +13,27 @@ interface DishImageProps {
   priority?: boolean;
   /** Hover zoom on the dish photo (catalog cards). */
   zoomOnHover?: boolean;
+  /** card = catalog grid; detail = product page (larger dish). */
+  size?: DishImageSize;
 }
 
 const DISH_BG = "/dish-bg.png";
+
+const FRAME: Record<
+  DishImageSize,
+  { splash: string; dish: string; splashScale: string }
+> = {
+  card: {
+    splash: "absolute inset-0",
+    dish: "absolute inset-[4%] md:inset-[7%]",
+    splashScale: "scale-[1.12]",
+  },
+  detail: {
+    splash: "absolute inset-0",
+    dish: "absolute inset-[1%] sm:inset-[3%] md:inset-[6%]",
+    splashScale: "scale-[1.18] md:scale-[1.12]",
+  },
+};
 
 /**
  * Dish photo framed on the branded orange splash.
@@ -27,7 +47,10 @@ export function DishImage({
   sizes = "(max-width: 768px) 50vw, 320px",
   priority = false,
   zoomOnHover = false,
+  size = "card",
 }: DishImageProps) {
+  const frame = FRAME[size];
+
   return (
     <div
       className={clsx(
@@ -35,14 +58,13 @@ export function DishImage({
         className,
       )}
     >
-      {/* Orange splash — shared frame size for all dishes */}
-      <div className="absolute inset-[2%]" aria-hidden>
+      <div className={frame.splash} aria-hidden>
         <Image
           src={DISH_BG}
           alt=""
           fill
           sizes={sizes}
-          className="object-contain object-center"
+          className={clsx("object-contain object-center", frame.splashScale)}
           priority={priority}
         />
       </div>
@@ -50,7 +72,7 @@ export function DishImage({
       {src ? (
         <div
           className={clsx(
-            "absolute inset-[14%]",
+            frame.dish,
             zoomOnHover &&
               "transition-transform duration-500 group-hover:scale-105",
           )}
