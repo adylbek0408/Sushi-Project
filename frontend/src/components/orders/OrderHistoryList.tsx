@@ -41,8 +41,7 @@ export function OrderHistoryList() {
               Заказ #{order.number}
             </h3>
             <p className="mt-1 font-body-md text-secondary">
-              {order.deliveryType === "delivery" ? "Доставка" : "Самовывоз"} ·{" "}
-              {pluralizeItems(order.itemCount)}
+              Доставка · {pluralizeItems(order.itemCount)}
             </p>
             <p className="mt-1 font-label-md text-label-sm text-tertiary-container">
               {new Date(order.createdAt).toLocaleString("ru-RU", {

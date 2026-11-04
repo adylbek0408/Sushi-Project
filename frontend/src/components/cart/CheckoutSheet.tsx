@@ -6,7 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Icon } from "@/components/ui/Icon";
 import { Input, Textarea } from "@/components/ui/Input";
-import { SegmentedToggle } from "./SegmentedToggle";
 import { CartItemRow } from "./CartItemRow";
 import { checkoutSchema, type CheckoutFormValues } from "./checkoutSchema";
 import { useCartStore, selectTotalAmount } from "@/store/cart";
@@ -37,16 +36,12 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     setError,
     formState: { errors, isSubmitting },
   } = useForm<CheckoutFormValues>({
     resolver: zodResolver(checkoutSchema),
-    defaultValues: { deliveryType: "delivery", address: "", customerName: "", phone: "", comment: "" },
+    defaultValues: { address: "", customerName: "", phone: "", comment: "" },
   });
-
-  const deliveryType = watch("deliveryType");
 
   useEffect(() => {
     if (isOpen) document.body.style.overflow = "hidden";
@@ -62,16 +57,20 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
 
     try {
       const order = await createOrder.mutateAsync({
-        delivery_type: values.deliveryType,
-        items: items.map((item) => ({ product_id: item.id, quantity: item.quantity })),
-        customer_name: values.customerName?.trim() || undefined,
-        phone: values.phone?.trim() || undefined,
-        address: values.address?.trim() || undefined,
+        delivery_type: "delivery",
+        items: items.map((item) => ({
+          product_id: item.productId,
+          variant_id: item.variantId,
+          quantity: item.quantity,
+        })),
+        customer_name: values.customerName.trim(),
+        phone: values.phone.trim(),
+        address: values.address.trim(),
         comment: values.comment?.trim() || undefined,
       });
 
       const message = buildWhatsAppMessage({
-        deliveryType: values.deliveryType,
+        deliveryType: "delivery",
         items,
         total: Number(order.total_amount),
         currency: settings.currency,
@@ -85,18 +84,13 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
       addToHistory({
         id: order.id,
         number: order.number,
-        deliveryType: order.delivery_type,
+        deliveryType: "delivery",
         total: order.total_amount,
         currency: settings.currency,
         itemCount: items.reduce((sum, i) => sum + i.quantity, 0),
         createdAt: order.created_at,
       });
 
-      // On mobile, a full navigation hands off to the WhatsApp app more
-      // reliably than window.open (whose new-tab context sometimes just
-      // shows wa.me's landing page instead of deep-linking). Desktop has
-      // no app to deep-link into anyway, so keep opening a new tab there
-      // and leave the storefront tab on /orders.
       const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
       if (isMobile) {
         window.location.href = url;
@@ -167,13 +161,6 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
           onSubmit={handleSubmit(onSubmit)}
           className="no-scrollbar flex-1 overflow-y-auto px-margin-mobile pb-6"
         >
-          <div className="mt-stack-md">
-            <SegmentedToggle
-              value={deliveryType}
-              onChange={(value) => setValue("deliveryType", value, { shouldValidate: false })}
-            />
-          </div>
-
           {items.length === 0 ? (
             <div className="mt-stack-lg flex flex-col items-center gap-2 py-10 text-center">
               <Icon name="shopping_cart" className="text-4xl text-secondary" />
@@ -181,7 +168,7 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
             </div>
           ) : (
             <>
-              <div className="mt-stack-lg space-y-stack-md">
+              <div className="mt-stack-md space-y-stack-md">
                 {items.map((item) => (
                   <CartItemRow key={item.id} item={item} currency={settings.currency} />
                 ))}
@@ -195,16 +182,13 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
               </div>
 
               <div className="mt-stack-lg space-y-4">
-                {deliveryType === "delivery" && (
-                  <Input
-                    label="Адрес доставки"
-                    placeholder="Улица, дом, квартира"
-                    icon={<Icon name="location_on" />}
-                    error={errors.address?.message}
-                    {...register("address")}
-                  />
-                )}
-
+                <Input
+                  label="Адрес доставки"
+                  placeholder="Улица, дом, квартира"
+                  icon={<Icon name="location_on" />}
+                  error={errors.address?.message}
+                  {...register("address")}
+                />
                 <Input
                   label="Имя"
                   placeholder="Ваше имя"
@@ -218,7 +202,6 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
                   error={errors.phone?.message}
                   {...register("phone")}
                 />
-
                 <Textarea
                   label="Комментарий"
                   rows={2}

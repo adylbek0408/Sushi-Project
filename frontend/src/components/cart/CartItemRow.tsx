@@ -15,10 +15,11 @@ interface CartItemRowProps {
 export function CartItemRow({ item, currency }: CartItemRowProps) {
   const increment = useCartStore((s) => s.increment);
   const decrement = useCartStore((s) => s.decrement);
+  const removeItem = useCartStore((s) => s.removeItem);
   const image = mediaUrl(item.image);
 
   return (
-    <div className="flex items-center gap-4 rounded-2xl bg-surface-container-low p-3">
+    <div className="flex items-center gap-3 rounded-2xl bg-surface-container-low p-3">
       <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-surface-container">
         {image ? (
           <Image
@@ -35,8 +36,18 @@ export function CartItemRow({ item, currency }: CartItemRowProps) {
         )}
       </div>
 
-      <div className="flex-1">
-        <h3 className="font-headline-md text-[16px] text-on-surface">{item.name}</h3>
+      <div className="min-w-0 flex-1">
+        <h3 className="truncate font-headline-md text-[16px] text-on-surface">
+          {item.name}
+        </h3>
+        {item.variantLabel ? (
+          <p className="font-label-md text-label-sm text-secondary">
+            Порция: {item.variantLabel}
+            {item.weight ? ` · ${item.weight} г` : ""}
+          </p>
+        ) : item.weight ? (
+          <p className="font-label-md text-label-sm text-secondary">{item.weight} г</p>
+        ) : null}
         <p className="font-body-md text-secondary">
           {formatPrice(item.price * item.quantity, currency)}
         </p>
@@ -47,6 +58,15 @@ export function CartItemRow({ item, currency }: CartItemRowProps) {
         onIncrement={() => increment(item.id)}
         onDecrement={() => decrement(item.id)}
       />
+
+      <button
+        type="button"
+        aria-label={`Удалить ${item.name} из корзины`}
+        onClick={() => removeItem(item.id)}
+        className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full text-secondary transition-colors hover:bg-error-container hover:text-error active:scale-90"
+      >
+        <Icon name="delete" className="text-[20px]" />
+      </button>
     </div>
   );
 }

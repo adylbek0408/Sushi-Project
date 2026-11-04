@@ -18,6 +18,7 @@ export function CartSidebar({ settings }: CartSidebarProps) {
   const items = useCartStore((s) => s.items);
   const increment = useCartStore((s) => s.increment);
   const decrement = useCartStore((s) => s.decrement);
+  const removeItem = useCartStore((s) => s.removeItem);
   const total = useCartStore(selectTotalAmount);
   const count = useCartStore(selectTotalCount);
   const openCheckout = useUiStore((s) => s.openCheckout);
@@ -56,8 +57,28 @@ export function CartSidebar({ settings }: CartSidebarProps) {
                   </div>
                 )}
               </div>
-              <div className="flex-1">
-                <h4 className="font-body-md font-medium">{item.name}</h4>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <h4 className="font-body-md font-medium">{item.name}</h4>
+                    {item.variantLabel ? (
+                      <p className="text-xs text-on-surface-variant">
+                        Порция: {item.variantLabel}
+                        {item.weight ? ` · ${item.weight} г` : ""}
+                      </p>
+                    ) : item.weight ? (
+                      <p className="text-xs text-on-surface-variant">{item.weight} г</p>
+                    ) : null}
+                  </div>
+                  <button
+                    type="button"
+                    aria-label={`Удалить ${item.name} из корзины`}
+                    onClick={() => removeItem(item.id)}
+                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full text-secondary transition-colors hover:bg-error-container hover:text-error active:scale-90"
+                  >
+                    <Icon name="delete" className="text-[18px]" />
+                  </button>
+                </div>
                 <div className="mt-2 flex items-center justify-between">
                   <span className="text-sm text-on-surface-variant">
                     {formatPrice(item.price * item.quantity, settings.currency)}

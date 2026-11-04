@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { clsx } from "@/lib/clsx";
-import { mediaUrl } from "@/lib/config";
+import { getCategoryImage } from "@/lib/categoryImages";
 import { Icon } from "@/components/ui/Icon";
 import type { Category } from "@/types";
 
@@ -25,6 +25,7 @@ export function CategoryScroller({
       <div className="no-scrollbar flex gap-4 overflow-x-auto px-margin-mobile pb-2 md:gap-6 md:px-0">
         <CategoryChip
           label="Все"
+          image="/categories/category-all.jpg"
           active={selectedSlug === null}
           onClick={() => onSelect(null)}
         />
@@ -32,7 +33,7 @@ export function CategoryScroller({
           <CategoryChip
             key={category.id}
             label={category.name}
-            image={category.image}
+            image={getCategoryImage(category.slug, category.name)}
             active={selectedSlug === category.slug}
             onClick={() => onSelect(category.slug)}
           />
@@ -50,7 +51,6 @@ interface CategoryChipProps {
 }
 
 function CategoryChip({ label, image, active, onClick }: CategoryChipProps) {
-  const resolvedImage = mediaUrl(image);
   return (
     <button
       type="button"
@@ -59,15 +59,15 @@ function CategoryChip({ label, image, active, onClick }: CategoryChipProps) {
     >
       <span
         className={clsx(
-          "flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl transition-transform active:scale-90 md:h-24 md:w-24 md:rounded-3xl",
+          "flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl bg-white transition-transform active:scale-90 md:h-24 md:w-24 md:rounded-3xl",
           active
-            ? "bg-primary-fixed shadow-elevation-2 ring-2 ring-primary/20"
-            : "border border-transparent bg-surface-container-high shadow-sm group-hover:border-primary/20",
+            ? "shadow-elevation-2 ring-2 ring-primary/25"
+            : "border border-transparent shadow-sm group-hover:border-primary/20",
         )}
       >
-        {resolvedImage ? (
+        {image ? (
           <Image
-            src={resolvedImage}
+            src={image}
             alt={label}
             width={96}
             height={96}

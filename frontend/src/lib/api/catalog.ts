@@ -19,7 +19,8 @@ export const catalogApi = {
     if (params?.category) query.set("category", params.category);
     if (params?.search) query.set("search", params.search);
     const qs = query.toString();
-    return apiClient.get<Product[]>(`/products/${qs ? `?${qs}` : ""}`, {
+    const path = qs ? `/products/?${qs}` : "/products/";
+    return apiClient.get<Product[]>(path, {
       next: { revalidate: REVALIDATE_SECONDS, tags: ["products"] },
     });
   },

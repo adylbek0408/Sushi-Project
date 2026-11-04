@@ -20,17 +20,22 @@ export function Catalog({ initialCategories, initialProducts, settings }: Catalo
   const setSelectedSlug = useCatalogStore((s) => s.setSelectedSlug);
 
   const { data: categories = initialCategories } = useCategories(initialCategories);
-  const { data: products, isFetching } = useProducts(
-    selectedSlug ? { category: selectedSlug } : {},
-    selectedSlug ? undefined : initialProducts,
+  // Always load the full menu once; split by category on the client so
+  // filtering never depends on a fragile query-string round-trip.
+  const { data: allProducts = initialProducts, isFetching } = useProducts(
+    {},
+    initialProducts,
   );
 
+  const list = useMemo(() => {
+    if (!selectedSlug) return allProducts;
+    return allProducts.filter((product) => product.category === selectedSlug);
+  }, [allProducts, selectedSlug]);
+
   const heading = useMemo(() => {
-    if (!selectedSlug) return "Популярное";
+    if (!selectedSlug) return "Меню";
     return categories.find((c) => c.slug === selectedSlug)?.name ?? "Меню";
   }, [selectedSlug, categories]);
-
-  const list = products ?? [];
 
   return (
     <>
@@ -70,7 +75,7 @@ function ProductGridSkeleton() {
     <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4 md:gap-6">
       {Array.from({ length: 4 }).map((_, index) => (
         <div key={index} className="overflow-hidden rounded-[24px] bg-surface-container-lowest p-2 shadow-elevation-1">
-          <Skeleton className="aspect-[4/3] w-full rounded-[20px]" />
+          <Skeleton className="aspect-square w-full rounded-[20px]" />
           <div className="space-y-2 p-2">
             <Skeleton className="h-4 w-3/4" />
             <Skeleton className="h-3 w-1/2" />

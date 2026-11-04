@@ -7,7 +7,7 @@ import { config } from "@/lib/config";
 export const revalidate = 60;
 
 export default async function HomePage() {
-  const { categories, products, banners, settings } = await getStorefrontData();
+  const { categories, products, settings } = await getStorefrontData();
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -29,7 +29,7 @@ export default async function HomePage() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <HeroSlider banners={banners} />
+      <HeroSlider />
       <div id="menu" className="scroll-mt-20">
         <Catalog
           initialCategories={categories}

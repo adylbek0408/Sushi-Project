@@ -3,7 +3,7 @@ import type { DeliveryType } from "@/types";
 import { formatPrice } from "./format";
 
 export interface WhatsAppOrderData {
-  deliveryType: DeliveryType;
+  deliveryType?: DeliveryType;
   items: CartItem[];
   total: number;
   currency: string;
@@ -22,7 +22,7 @@ export function buildWhatsAppMessage(data: WhatsAppOrderData): string {
   lines.push("Новый заказ");
   lines.push("");
   lines.push("Способ получения:");
-  lines.push(data.deliveryType === "delivery" ? "Доставка" : "Самовывоз");
+  lines.push("Доставка");
   lines.push("");
 
   lines.push("Имя:");
@@ -32,11 +32,9 @@ export function buildWhatsAppMessage(data: WhatsAppOrderData): string {
   lines.push(data.phone?.trim() || "—");
   lines.push("");
 
-  if (data.deliveryType === "delivery") {
-    lines.push("Адрес:");
-    lines.push(data.address?.trim() || "—");
-    lines.push("");
-  }
+  lines.push("Адрес:");
+  lines.push(data.address?.trim() || "—");
+  lines.push("");
 
   if (data.comment?.trim()) {
     lines.push("Комментарий:");
@@ -46,7 +44,8 @@ export function buildWhatsAppMessage(data: WhatsAppOrderData): string {
 
   lines.push("Товары:");
   for (const item of data.items) {
-    lines.push(`${item.name} ×${item.quantity}`);
+    const label = item.variantLabel ? ` — порция: ${item.variantLabel}` : "";
+    lines.push(`${item.name}${label} ×${item.quantity}`);
   }
   lines.push("");
 

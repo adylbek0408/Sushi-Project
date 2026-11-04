@@ -24,7 +24,13 @@ export function StorefrontShell({
   return (
     <>
       <div className="lg:flex lg:h-screen lg:overflow-hidden">
-        <div className="no-scrollbar flex flex-1 flex-col pb-32 lg:overflow-y-auto lg:pb-8">
+        <div
+          className={
+            withSidebar
+              ? "no-scrollbar flex flex-1 flex-col pb-32 lg:overflow-y-auto lg:pb-8"
+              : "no-scrollbar flex flex-1 flex-col pb-44 lg:overflow-y-auto lg:pb-8"
+          }
+        >
           <Header settings={settings} />
           <main className="mx-auto w-full max-w-container-max md:px-margin-desktop">
             {children}

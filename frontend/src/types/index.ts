@@ -16,17 +16,27 @@ export interface Banner {
   sort_order: number;
 }
 
+export interface ProductVariant {
+  id: string;
+  label: string;
+  weight: number | null;
+  price: string | number;
+}
+
 export interface Product {
   id: string;
   name: string;
   slug: string;
   description: string;
-  price: string;
+  /** Lowest / default portion price when variants exist. */
+  price: string | number;
   weight: number | null;
   image: string | null;
   is_popular: boolean;
   category: string;
   category_name: string;
+  /** Active portion sizes (Стандарт / Большой). Empty = single-price product. */
+  variants?: ProductVariant[];
 }
 
 export interface ShopSettings {
@@ -46,6 +56,7 @@ export type DeliveryType = "delivery" | "pickup";
 
 export interface OrderItemInput {
   product_id: string;
+  variant_id?: string | null;
   quantity: number;
 }
 
