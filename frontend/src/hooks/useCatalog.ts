@@ -13,6 +13,8 @@ export function useCategories(initialData?: Category[]) {
     queryFn: () => catalogApi.getCategories(),
     staleTime: FIVE_MINUTES,
     initialData,
+    // iOS Safari: cart sheet mounts late — ensure cache is warm / refetch if empty
+    refetchOnMount: true,
   });
 }
 
@@ -25,6 +27,7 @@ export function useProducts(
     queryFn: () => catalogApi.getProducts(params),
     staleTime: FIVE_MINUTES,
     initialData,
+    refetchOnMount: true,
   });
 }
 

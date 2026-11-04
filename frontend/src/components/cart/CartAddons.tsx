@@ -22,12 +22,15 @@ interface CartAddonsProps {
 /**
  * Horizontal «Добавить к заказу» strip — products from is_addon categories,
  * excluding anything already in the cart. Whole card is clickable.
+ *
+ * iOS notes: explicit card heights (aspect-ratio in overflow-x flex often
+ * collapses on Safari); parent sheet must use min-h-0 for scroll.
  */
 export function CartAddons({ currency }: CartAddonsProps) {
   const items = useCartStore((s) => s.items);
   const addItem = useCartStore((s) => s.addItem);
-  const { data: categories = [] } = useCategories();
-  const { data: products = [] } = useProducts({});
+  const { data: categories = [], isLoading: catsLoading } = useCategories();
+  const { data: products = [], isLoading: productsLoading } = useProducts({});
   const [picking, setPicking] = useState<Product | null>(null);
   const [variantId, setVariantId] = useState("");
 
@@ -38,14 +41,17 @@ export function CartAddons({ currency }: CartAddonsProps) {
 
   const addons = useMemo(() => {
     const addonSlugs = new Set(
-      categories.filter((c) => c.is_addon).map((c) => c.slug),
+      categories.filter((c) => Boolean(c.is_addon)).map((c) => c.slug),
     );
+    if (addonSlugs.size === 0) return [];
     return products.filter(
       (p) => addonSlugs.has(p.category) && !inCartIds.has(p.id),
     );
   }, [categories, products, inCartIds]);
 
-  if (addons.length === 0) return null;
+  const loading = (catsLoading || productsLoading) && addons.length === 0;
+
+  if (!loading && addons.length === 0) return null;
 
   const handleAdd = (product: Product) => {
     const variants = getVariants(product);
@@ -71,16 +77,31 @@ export function CartAddons({ currency }: CartAddonsProps) {
       <h3 className="mb-3 font-headline-md text-[18px] text-on-surface">
         Добавить к заказу
       </h3>
-      <div className="no-scrollbar -mx-1 flex gap-3 overflow-x-auto px-1 pb-1">
-        {addons.map((product) => (
-          <AddonCard
-            key={product.id}
-            product={product}
-            currency={currency}
-            onAdd={() => handleAdd(product)}
-          />
-        ))}
-      </div>
+
+      {loading ? (
+        <div className="flex gap-3 overflow-hidden">
+          {Array.from({ length: 3 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-[220px] w-[140px] shrink-0 animate-pulse rounded-2xl bg-surface-container-high"
+            />
+          ))}
+        </div>
+      ) : (
+        <div
+          className="flex gap-3 overflow-x-auto overscroll-x-contain px-0.5 pb-2 [-webkit-overflow-scrolling:touch]"
+          style={{ scrollbarWidth: "none" }}
+        >
+          {addons.map((product) => (
+            <AddonCard
+              key={product.id}
+              product={product}
+              currency={currency}
+              onAdd={() => handleAdd(product)}
+            />
+          ))}
+        </div>
+      )}
 
       {picking ? (
         <div
@@ -132,37 +153,25 @@ function AddonCard({
       type="button"
       onClick={onAdd}
       aria-label={`Добавить «${product.name}» к заказу`}
-      className="flex w-[140px] shrink-0 flex-col overflow-hidden rounded-2xl bg-white text-left shadow-sm ring-1 ring-black/5 transition-transform active:scale-[0.97]"
+      className="flex w-[140px] shrink-0 flex-col rounded-2xl bg-white text-left shadow-sm ring-1 ring-black/5 transition-transform active:scale-[0.97]"
     >
-      <div className="relative aspect-square overflow-hidden bg-white">
-        {/* Orange splash — temporarily disabled
-        <div className="absolute inset-[4%]" aria-hidden>
+      {/* Fixed height — iOS Safari often collapses aspect-ratio inside overflow-x flex */}
+      <div className="relative h-[140px] w-[140px] shrink-0 overflow-hidden rounded-t-2xl bg-white">
+        {image ? (
           <Image
-            src="/dish-bg.png"
+            src={image}
             alt=""
             fill
             sizes="140px"
-            className="object-contain object-center"
+            className="object-contain object-center p-2"
           />
-        </div>
-        */}
-        {image ? (
-          <div className="absolute inset-[10%]">
-            <Image
-              src={image}
-              alt=""
-              fill
-              sizes="140px"
-              className="object-contain object-center"
-            />
-          </div>
         ) : (
           <div className="absolute inset-0 flex items-center justify-center">
             <Icon name="ramen_dining" className="text-2xl text-secondary" />
           </div>
         )}
       </div>
-      <div className="flex flex-1 flex-col gap-2 p-2.5">
+      <div className="flex min-h-[88px] flex-1 flex-col gap-2 p-2.5">
         <h4 className="line-clamp-2 min-h-[2.4em] font-body-md text-[13px] leading-snug text-on-surface">
           {product.name}
         </h4>

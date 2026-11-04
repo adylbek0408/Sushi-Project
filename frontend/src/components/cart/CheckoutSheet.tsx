@@ -139,7 +139,7 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
       onClick={closeCheckout}
     >
       <div
-        className="flex max-h-[90vh] w-full flex-col overflow-hidden rounded-t-[32px] bg-surface-container-lowest shadow-[0_-10px_40px_rgba(0,0,0,0.12)] animate-slide-up md:max-w-lg md:rounded-[32px]"
+        className="flex max-h-[90dvh] min-h-0 w-full flex-col overflow-hidden rounded-t-[32px] bg-surface-container-lowest shadow-[0_-10px_40px_rgba(0,0,0,0.12)] animate-slide-up md:max-h-[90vh] md:max-w-lg md:rounded-[32px]"
         onClick={(event) => event.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -164,7 +164,7 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
         <form
           id="checkout-form"
           onSubmit={handleSubmit(onSubmit)}
-          className="no-scrollbar flex-1 overflow-y-auto px-margin-mobile pb-6"
+          className="no-scrollbar min-h-0 flex-1 overflow-y-auto overscroll-contain px-margin-mobile pb-6 [-webkit-overflow-scrolling:touch]"
         >
           {items.length === 0 ? (
             <div className="mt-stack-lg flex flex-col items-center gap-2 py-10 text-center">

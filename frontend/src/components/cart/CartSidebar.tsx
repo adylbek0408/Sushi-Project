@@ -33,7 +33,7 @@ export function CartSidebar({ settings }: CartSidebarProps) {
         </h2>
       </div>
 
-      <div className="no-scrollbar flex-1 space-y-5 overflow-y-auto p-6">
+      <div className="no-scrollbar min-h-0 flex-1 space-y-5 overflow-y-auto overscroll-contain p-6 [-webkit-overflow-scrolling:touch]">
         {!hydrated || count === 0 ? (
           <div className="flex flex-col items-center gap-2 py-16 text-center">
             <Icon name="shopping_cart" className="text-4xl text-secondary" />
