@@ -59,7 +59,17 @@ export function CartSidebar({ settings }: CartSidebarProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-start justify-between gap-2">
-                  <h4 className="font-body-md font-medium">{item.name}</h4>
+                  <div className="min-w-0">
+                    <h4 className="font-body-md font-medium">{item.name}</h4>
+                    {item.variantLabel ? (
+                      <p className="text-xs text-on-surface-variant">
+                        Порция: {item.variantLabel}
+                        {item.weight ? ` · ${item.weight} г` : ""}
+                      </p>
+                    ) : item.weight ? (
+                      <p className="text-xs text-on-surface-variant">{item.weight} г</p>
+                    ) : null}
+                  </div>
                   <button
                     type="button"
                     aria-label={`Удалить ${item.name} из корзины`}

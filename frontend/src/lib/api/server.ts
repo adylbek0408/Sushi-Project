@@ -1,7 +1,7 @@
 import "server-only";
 import { catalogApi } from "./catalog";
 import { settingsApi } from "./settings";
-import type { Banner, Category, Product, ShopSettings } from "@/types";
+import type { Category, Product, ShopSettings } from "@/types";
 
 export const DEFAULT_SETTINGS: ShopSettings = {
   shop_name: "Sushiya",
@@ -19,23 +19,22 @@ export const DEFAULT_SETTINGS: ShopSettings = {
 export interface StorefrontData {
   categories: Category[];
   products: Product[];
-  banners: Banner[];
   settings: ShopSettings;
 }
 
 /**
  * Fetches everything the home page needs in parallel. Failures degrade
  * gracefully so a transient API outage never breaks the static build.
+ * Hero banners are static on the frontend (see lib/banners.ts).
  */
 export async function getStorefrontData(): Promise<StorefrontData> {
-  const [categories, products, banners, settings] = await Promise.all([
+  const [categories, products, settings] = await Promise.all([
     catalogApi.getCategories().catch(() => [] as Category[]),
     catalogApi.getProducts({}).catch(() => [] as Product[]),
-    catalogApi.getBanners().catch(() => [] as Banner[]),
     settingsApi.getSettings().catch(() => DEFAULT_SETTINGS),
   ]);
 
-  return { categories, products, banners, settings };
+  return { categories, products, settings };
 }
 
 export async function getSettingsSafe(): Promise<ShopSettings> {

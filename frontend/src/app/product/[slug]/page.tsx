@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { StorefrontShell } from "@/components/layout/StorefrontShell";
 import { AddToCartButton } from "@/components/home/AddToCartButton";
+import { DishImage } from "@/components/home/DishImage";
 import { Icon } from "@/components/ui/Icon";
 import { catalogApi } from "@/lib/api/catalog";
 import { getSettingsSafe } from "@/lib/api/server";
 import { ApiError } from "@/lib/api/client";
-import { formatPrice } from "@/lib/format";
 import { config, mediaUrl } from "@/lib/config";
+import { getDefaultVariant, resolvePrice } from "@/lib/product";
 import type { Product } from "@/types";
 
 export const revalidate = 60;
@@ -50,6 +50,7 @@ export default async function ProductPage({ params }: PageProps) {
 
   if (!product) notFound();
 
+  const defaultVariant = getDefaultVariant(product);
   const jsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
@@ -58,7 +59,7 @@ export default async function ProductPage({ params }: PageProps) {
     image: mediaUrl(product.image) ?? undefined,
     offers: {
       "@type": "Offer",
-      price: Number(product.price),
+      price: resolvePrice(product, defaultVariant),
       priceCurrency: "KGS",
       availability: "https://schema.org/InStock",
       url: `${config.siteUrl}/product/${product.slug}`,
@@ -71,7 +72,7 @@ export default async function ProductPage({ params }: PageProps) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="px-margin-mobile pt-4 md:px-0 md:pt-8">
+      <div className="px-margin-mobile pb-40 pt-4 md:px-0 md:pb-8 md:pt-8">
         <Link
           href="/"
           className="mb-4 inline-flex items-center gap-1 font-label-md text-label-md text-secondary transition-colors hover:text-primary"
@@ -81,44 +82,29 @@ export default async function ProductPage({ params }: PageProps) {
         </Link>
 
         <div className="grid gap-6 md:grid-cols-2 md:gap-12">
-          <div className="relative aspect-square overflow-hidden rounded-3xl bg-surface-container">
-            {mediaUrl(product.image) ? (
-              <Image
-                src={mediaUrl(product.image) as string}
-                alt={product.name}
-                fill
-                priority
-                sizes="(max-width: 768px) 100vw, 50vw"
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center">
-                <Icon name="ramen_dining" className="text-6xl text-secondary" />
-              </div>
-            )}
-          </div>
+          <DishImage
+            src={mediaUrl(product.image)}
+            alt={product.name}
+            priority
+            className="rounded-3xl"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
 
-          <div className="flex flex-col">
+          <div className="flex flex-col gap-4 md:min-h-0">
             <span className="font-label-md text-label-md uppercase text-secondary">
               {product.category_name}
             </span>
-            <h1 className="mt-2 font-headline-lg text-headline-lg-mobile text-on-surface md:text-headline-lg">
+            <h1 className="font-headline-lg text-headline-lg-mobile text-on-surface md:text-headline-lg">
               {product.name}
             </h1>
-            {product.weight ? (
-              <span className="mt-1 font-body-md text-secondary">{product.weight} г</span>
-            ) : null}
             {product.description && (
-              <p className="mt-4 font-body-lg text-on-surface-variant">
+              <p className="font-body-lg text-on-surface-variant">
                 {product.description}
               </p>
             )}
 
-            <div className="mt-auto pt-8">
-              <div className="mb-4 font-display-lg text-headline-lg text-primary">
-                {formatPrice(product.price, settings.currency)}
-              </div>
-              <AddToCartButton product={product} />
+            <div className="pt-4 md:mt-auto md:pt-8">
+              <AddToCartButton product={product} currency={settings.currency} />
             </div>
           </div>
         </div>

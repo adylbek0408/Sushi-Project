@@ -40,6 +40,14 @@ export function CartItemRow({ item, currency }: CartItemRowProps) {
         <h3 className="truncate font-headline-md text-[16px] text-on-surface">
           {item.name}
         </h3>
+        {item.variantLabel ? (
+          <p className="font-label-md text-label-sm text-secondary">
+            Порция: {item.variantLabel}
+            {item.weight ? ` · ${item.weight} г` : ""}
+          </p>
+        ) : item.weight ? (
+          <p className="font-label-md text-label-sm text-secondary">{item.weight} г</p>
+        ) : null}
         <p className="font-body-md text-secondary">
           {formatPrice(item.price * item.quantity, currency)}
         </p>

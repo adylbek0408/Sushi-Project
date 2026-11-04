@@ -1,9 +1,14 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import type { Product } from "@/types";
+import { cartLineId, resolvePrice, resolveWeight } from "@/lib/product";
+import type { Product, ProductVariant } from "@/types";
 
 export interface CartItem {
+  /** Unique line id (product id, or product:variant). */
   id: string;
+  productId: string;
+  variantId: string | null;
+  variantLabel: string | null;
   name: string;
   price: number;
   image: string | null;
@@ -13,7 +18,7 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
-  addItem: (product: Product) => void;
+  addItem: (product: Product, variant?: ProductVariant | null) => void;
   increment: (id: string) => void;
   decrement: (id: string) => void;
   removeItem: (id: string) => void;
@@ -25,27 +30,33 @@ export const useCartStore = create<CartState>()(
     (set) => ({
       items: [],
 
-      addItem: (product) =>
+      addItem: (product, variant = null) =>
         set((state) => {
-          const existing = state.items.find((item) => item.id === product.id);
+          const chosen = variant ?? null;
+          const lineId = cartLineId(product.id, chosen?.id);
+          const existing = state.items.find((item) => item.id === lineId);
           if (existing) {
             return {
               items: state.items.map((item) =>
-                item.id === product.id
+                item.id === lineId
                   ? { ...item, quantity: item.quantity + 1 }
                   : item,
               ),
             };
           }
+
           return {
             items: [
               ...state.items,
               {
-                id: product.id,
+                id: lineId,
+                productId: product.id,
+                variantId: chosen?.id ?? null,
+                variantLabel: chosen?.label ?? null,
                 name: product.name,
-                price: Number(product.price),
+                price: resolvePrice(product, chosen),
                 image: product.image,
-                weight: product.weight,
+                weight: resolveWeight(product, chosen),
                 quantity: 1,
               },
             ],
@@ -77,7 +88,8 @@ export const useCartStore = create<CartState>()(
     }),
     {
       name: "sushiya-cart",
-      version: 1,
+      // v2: productId + variantId on each line (old cart shape is incompatible).
+      version: 2,
     },
   ),
 );
