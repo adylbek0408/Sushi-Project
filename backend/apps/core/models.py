@@ -51,8 +51,8 @@ class ShopSettings(SingletonModel):
     whatsapp_number = models.CharField(
         "WhatsApp номер",
         max_length=20,
-        help_text="В международном формате без '+', например 996700123456.",
-        default="996700000000",
+        help_text="В международном формате без '+', например 996999310755.",
+        default="996999310755",
     )
     currency = models.CharField("Валюта", max_length=10, default="сом")
     city = models.CharField("Город", max_length=80, default="Бишкек")

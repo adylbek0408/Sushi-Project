@@ -15,6 +15,7 @@ import { useUiStore } from "@/store/ui";
 import { useOrderHistoryStore } from "@/store/orderHistory";
 import { useHydrated } from "@/hooks/useHydrated";
 import { useCreateOrder } from "@/hooks/useCreateOrder";
+import { ORDER_WHATSAPP_NUMBER } from "@/lib/config";
 import { calcCartPricing } from "@/lib/discount";
 import { buildWhatsAppMessage, buildWhatsAppUrl } from "@/lib/whatsapp";
 import { ApiError } from "@/lib/api/client";
@@ -84,7 +85,7 @@ export function CheckoutSheet({ settings }: CheckoutSheetProps) {
         phone: values.phone,
         comment: values.comment,
       });
-      const url = buildWhatsAppUrl(settings.whatsapp_number, message);
+      const url = buildWhatsAppUrl(ORDER_WHATSAPP_NUMBER, message);
 
       addToHistory({
         id: order.id,

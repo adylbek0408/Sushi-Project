@@ -5,7 +5,7 @@ import type { Category, Product, ShopSettings } from "@/types";
 
 export const DEFAULT_SETTINGS: ShopSettings = {
   shop_name: "Sushiya",
-  whatsapp_number: "996700000000",
+  whatsapp_number: "996999310755",
   currency: "сом",
   city: "Бишкек",
   pickup_address: "ул. Киевская 49А",

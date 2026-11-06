@@ -7,6 +7,9 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   poweredByHeader: false,
+  // Keep `/api/v1/.../` intact so the Django proxy does not bounce
+  // trailing-slash redirects back and forth.
+  skipTrailingSlashRedirect: true,
   images: {
     remotePatterns: [
       {
@@ -18,6 +21,15 @@ const nextConfig: NextConfig = {
         hostname: apiHostname,
       },
     ],
+  },
+  async rewrites() {
+    const base = apiUrl.replace(/\/$/, "");
+    return [
+      {
+        source: "/api/:path*",
+        destination: `${base}/api/:path*/`,
+      },
+    ];
   },
   async headers() {
     return [

@@ -7,6 +7,9 @@ const isServer = typeof window === "undefined";
 const publicApiUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 const internalApiUrl = process.env.INTERNAL_API_URL ?? publicApiUrl;
 
+/** WhatsApp destination for new orders (no '+'). */
+export const ORDER_WHATSAPP_NUMBER = "996999310755";
+
 export const config = {
   apiBaseUrl: isServer ? internalApiUrl : publicApiUrl,
   publicApiUrl,
@@ -15,6 +18,12 @@ export const config = {
 } as const;
 
 export function apiUrl(path: string): string {
+  // Browser calls the same origin (`/api/v1/...`). Next.js rewrites that to the
+  // real API in dev, and Nginx does it in production. A cross-origin POST from
+  // localhost to menu.teyva.us is blocked by CORS and the order fails silently.
+  if (!isServer) {
+    return `${config.apiVersionPrefix}${path}`;
+  }
   const base = config.apiBaseUrl.replace(/\/$/, "");
   return `${base}${config.apiVersionPrefix}${path}`;
 }
