@@ -1,12 +1,17 @@
 "use client";
 
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { DishImage } from "@/components/home/DishImage";
 import { Icon } from "@/components/ui/Icon";
 import { formatPrice } from "@/lib/format";
 import { mediaUrl } from "@/lib/config";
-import { getDefaultVariant, resolvePrice, resolveWeight } from "@/lib/product";
+import {
+  getDefaultVariant,
+  resolvePrice,
+  resolveWeight,
+} from "@/lib/product";
+import { useCartStore } from "@/store/cart";
+import { useUiStore } from "@/store/ui";
 import type { Product } from "@/types";
 
 interface ProductCardProps {
@@ -14,24 +19,39 @@ interface ProductCardProps {
   currency: string;
 }
 
-/** Catalog card — + opens the detail page so the user picks a portion there. */
+/** Catalog card — tap adds the large portion and opens the cart. */
 export function ProductCard({ product, currency }: ProductCardProps) {
-  const router = useRouter();
-  const defaultVariant = getDefaultVariant(product);
-  const price = resolvePrice(product, defaultVariant);
-  const weight = resolveWeight(product, defaultVariant);
-  const image = mediaUrl(product.image);
-  const href = `/product/${product.slug}`;
+  const addItem = useCartStore((s) => s.addItem);
+  const openCheckout = useUiStore((s) => s.openCheckout);
+  const [justAdded, setJustAdded] = useState(false);
 
-  const goToDetail = (event: React.MouseEvent) => {
-    event.preventDefault();
-    event.stopPropagation();
-    router.push(href);
+  const variant = getDefaultVariant(product);
+  const price = resolvePrice(product, variant);
+  const weight = resolveWeight(product, variant);
+  const image = mediaUrl(product.image);
+
+  const handleAdd = () => {
+    addItem(product, variant);
+    setJustAdded(true);
+    openCheckout();
+    window.setTimeout(() => setJustAdded(false), 900);
   };
 
   return (
     <article className="group relative flex flex-col overflow-hidden rounded-[24px] bg-surface-container-lowest shadow-elevation-1 transition-transform duration-200 active:scale-[0.98] md:rounded-3xl md:transition-shadow md:hover:shadow-elevation-2 md:active:scale-100">
-      <Link href={href} className="flex flex-1 flex-col">
+      <div
+        role="button"
+        tabIndex={0}
+        onClick={handleAdd}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            handleAdd();
+          }
+        }}
+        aria-label={`Добавить «${product.name}» в корзину`}
+        className="flex flex-1 cursor-pointer flex-col text-left"
+      >
         <DishImage
           src={image}
           alt={product.name}
@@ -62,15 +82,18 @@ export function ProductCard({ product, currency }: ProductCardProps) {
             </div>
           </div>
         </div>
-      </Link>
+      </div>
 
       <button
         type="button"
-        aria-label={`Выбрать порцию «${product.name}»`}
-        onClick={goToDetail}
-        className="absolute bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_4px_12px_rgba(254,129,40,0.35)] transition-all duration-200 hover:bg-primary/90 active:scale-90 md:bottom-6 md:right-6 md:h-12 md:w-12"
+        aria-label={`Добавить «${product.name}» в корзину`}
+        onClick={(event) => {
+          event.stopPropagation();
+          handleAdd();
+        }}
+        className="absolute bottom-4 right-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-primary text-on-primary shadow-[0_4px_12px_rgba(254,129,40,0.35)] transition-all duration-200 hover:bg-primary/90 active:scale-90 md:bottom-6 md:right-6 md:h-12 md:w-12"
       >
-        <Icon name="add" />
+        <Icon name={justAdded ? "check" : "add"} />
       </button>
     </article>
   );

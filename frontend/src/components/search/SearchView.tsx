@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Icon } from "@/components/ui/Icon";
 import { ProductCard } from "@/components/home/ProductCard";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { catalogApi } from "@/lib/api/catalog";
+import { filterVisibleProducts } from "@/lib/catalogVisibility";
 import type { ShopSettings } from "@/types";
 
 interface SearchViewProps {
@@ -22,6 +23,11 @@ export function SearchView({ settings }: SearchViewProps) {
     enabled: trimmed.length >= 2,
     staleTime: 60 * 1000,
   });
+
+  const results = useMemo(
+    () => (data ? filterVisibleProducts(data) : []),
+    [data],
+  );
 
   return (
     <div className="px-margin-mobile pt-4 md:px-0 md:pt-8">
@@ -50,9 +56,9 @@ export function SearchView({ settings }: SearchViewProps) {
             <Skeleton key={i} className="aspect-[3/4] w-full rounded-[24px]" />
           ))}
         </div>
-      ) : data && data.length > 0 ? (
+      ) : results.length > 0 ? (
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-3 xl:grid-cols-4 md:gap-6">
-          {data.map((product) => (
+          {results.map((product) => (
             <ProductCard key={product.id} product={product} currency={settings.currency} />
           ))}
         </div>

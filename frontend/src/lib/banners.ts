@@ -5,18 +5,12 @@ export interface HeroBanner {
   title: string;
   subtitle: string;
   image: string;
-  tiers: { portions: string; percent: string }[];
 }
 
 export const HERO_BANNER: HeroBanner = {
-  id: "volume-discount",
-  eyebrow: "Акция",
-  title: "Чем больше порций — тем выше скидка",
-  subtitle: "Скидка на основные блюда. Салаты и напитки — без скидки.",
+  id: "free-delivery",
+  eyebrow: "Доставка",
+  title: "Заказ от 7 порций — доставка бесплатно",
+  subtitle: "Собери корзину из семи порций и мы привезём заказ без оплаты доставки.",
   image: "/banners/banner-discount-15.jpg",
-  tiers: [
-    { portions: "от 10", percent: "15%" },
-    { portions: "от 30", percent: "20%" },
-    { portions: "от 50", percent: "25%" },
-  ],
 };

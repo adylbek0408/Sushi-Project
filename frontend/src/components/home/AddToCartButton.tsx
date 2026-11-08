@@ -1,14 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Icon } from "@/components/ui/Icon";
 import { QuantityStepper } from "@/components/ui/QuantityStepper";
-import { PortionPicker } from "@/components/home/PortionPicker";
 import { formatPrice } from "@/lib/format";
 import {
   cartLineId,
   getDefaultVariant,
-  getVariants,
   resolvePrice,
   resolveWeight,
 } from "@/lib/product";
@@ -22,6 +20,7 @@ interface AddToCartButtonProps {
   currency: string;
 }
 
+/** Detail CTA — always the large portion; no gram/portion picker. */
 export function AddToCartButton({ product, currency }: AddToCartButtonProps) {
   const items = useCartStore((s) => s.items);
   const addItem = useCartStore((s) => s.addItem);
@@ -31,13 +30,7 @@ export function AddToCartButton({ product, currency }: AddToCartButtonProps) {
   const hydrated = useHydrated();
   const [justAdded, setJustAdded] = useState(false);
 
-  const variants = useMemo(() => getVariants(product), [product]);
-  const [variantId, setVariantId] = useState(
-    () => getDefaultVariant(product)?.id ?? "",
-  );
-
-  const selected =
-    variants.find((v) => v.id === variantId) ?? getDefaultVariant(product);
+  const selected = getDefaultVariant(product);
   const lineId = cartLineId(product.id, selected?.id);
   const inCart = hydrated ? items.find((item) => item.id === lineId) : undefined;
   const price = resolvePrice(product, selected);
@@ -45,13 +38,6 @@ export function AddToCartButton({ product, currency }: AddToCartButtonProps) {
 
   return (
     <div className="flex flex-col gap-5">
-      <PortionPicker
-        variants={variants}
-        value={selected?.id ?? ""}
-        onChange={setVariantId}
-        currency={currency}
-      />
-
       <div className="flex items-baseline gap-3">
         <span className="font-display-lg text-headline-lg text-primary">
           {formatPrice(price, currency)}

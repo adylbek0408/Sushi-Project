@@ -73,10 +73,21 @@ class ProductSerializer(RelativeImageMixin, serializers.ModelSerializer):
     def get_variants(self, obj: Product):
         return ProductVariantSerializer(self._active_variants(obj), many=True).data
 
-    def get_price(self, obj: Product):
+    def _storefront_variant(self, obj: Product) -> ProductVariant | None:
+        """Prefer the large (~400 г) portion — storefront sells only that size."""
         variants = self._active_variants(obj)
-        return variants[0].price if variants else obj.price
+        if not variants:
+            return None
+        for variant in variants:
+            label = (variant.label or "").lower()
+            if variant.weight == 400 or "больш" in label or "large" in label:
+                return variant
+        return max(variants, key=lambda v: (v.weight or 0, v.price))
+
+    def get_price(self, obj: Product):
+        variant = self._storefront_variant(obj)
+        return variant.price if variant else obj.price
 
     def get_weight(self, obj: Product):
-        variants = self._active_variants(obj)
-        return variants[0].weight if variants else obj.weight
+        variant = self._storefront_variant(obj)
+        return variant.weight if variant else obj.weight

@@ -37,7 +37,7 @@ export interface Product {
   is_popular: boolean;
   category: string;
   category_name: string;
-  /** Active portion sizes (Стандарт / Большой). Empty = single-price product. */
+  /** Portion sizes from API. Storefront always uses the large (~400 г) one. */
   variants?: ProductVariant[];
 }
 

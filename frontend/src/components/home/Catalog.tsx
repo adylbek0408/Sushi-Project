@@ -6,6 +6,10 @@ import { ProductCard } from "./ProductCard";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { Icon } from "@/components/ui/Icon";
 import { useCategories, useProducts } from "@/hooks/useCatalog";
+import {
+  filterVisibleCategories,
+  filterVisibleProducts,
+} from "@/lib/catalogVisibility";
 import { useCatalogStore } from "@/store/catalog";
 import type { Category, Product, ShopSettings } from "@/types";
 
@@ -32,14 +36,17 @@ export function Catalog({ initialCategories, initialProducts, settings }: Catalo
   );
 
   // Addon categories (salads/drinks) live in the cart upsell strip, not the main menu.
+  // Sandwiches are temporarily frozen on the storefront.
   const menuCategories = useMemo(
-    () => categories.filter((c) => !c.is_addon),
+    () => filterVisibleCategories(categories).filter((c) => !c.is_addon),
     [categories],
   );
 
   const menuProducts = useMemo(() => {
     const addonSlugs = new Set(categories.filter((c) => c.is_addon).map((c) => c.slug));
-    return allProducts.filter((p) => !addonSlugs.has(p.category));
+    return filterVisibleProducts(allProducts).filter(
+      (p) => !addonSlugs.has(p.category),
+    );
   }, [allProducts, categories]);
 
   /** "Все" → sections by category; single tab → one section. */

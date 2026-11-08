@@ -1,18 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import Image from "next/image";
 import { Icon } from "@/components/ui/Icon";
-import { PortionPicker } from "@/components/home/PortionPicker";
 import { useCategories, useProducts } from "@/hooks/useCatalog";
 import { useCartStore } from "@/store/cart";
 import { formatPrice } from "@/lib/format";
 import { mediaUrl } from "@/lib/config";
-import {
-  getDefaultVariant,
-  getVariants,
-  resolvePrice,
-} from "@/lib/product";
+import { getDefaultVariant, resolvePrice } from "@/lib/product";
 import type { Product } from "@/types";
 
 interface CartAddonsProps {
@@ -31,8 +26,6 @@ export function CartAddons({ currency }: CartAddonsProps) {
   const addItem = useCartStore((s) => s.addItem);
   const { data: categories = [], isLoading: catsLoading } = useCategories();
   const { data: products = [], isLoading: productsLoading } = useProducts({});
-  const [picking, setPicking] = useState<Product | null>(null);
-  const [variantId, setVariantId] = useState("");
 
   const inCartIds = useMemo(
     () => new Set(items.map((item) => item.productId)),
@@ -52,25 +45,6 @@ export function CartAddons({ currency }: CartAddonsProps) {
   const loading = (catsLoading || productsLoading) && addons.length === 0;
 
   if (!loading && addons.length === 0) return null;
-
-  const handleAdd = (product: Product) => {
-    const variants = getVariants(product);
-    if (variants.length > 1) {
-      setPicking(product);
-      setVariantId(variants[0]?.id ?? "");
-      return;
-    }
-    addItem(product, getDefaultVariant(product), { isAddon: true });
-  };
-
-  const confirmVariant = () => {
-    if (!picking) return;
-    const variants = getVariants(picking);
-    const selected =
-      variants.find((v) => v.id === variantId) ?? getDefaultVariant(picking);
-    addItem(picking, selected, { isAddon: true });
-    setPicking(null);
-  };
 
   return (
     <div className="pt-2">
@@ -97,41 +71,13 @@ export function CartAddons({ currency }: CartAddonsProps) {
               key={product.id}
               product={product}
               currency={currency}
-              onAdd={() => handleAdd(product)}
+              onAdd={() =>
+                addItem(product, getDefaultVariant(product), { isAddon: true })
+              }
             />
           ))}
         </div>
       )}
-
-      {picking ? (
-        <div
-          className="fixed inset-0 z-[70] flex items-end justify-center overlay-blur md:items-center"
-          onClick={() => setPicking(null)}
-        >
-          <div
-            className="w-full max-w-md rounded-t-[28px] bg-surface-container-lowest p-6 shadow-elevation-2 md:rounded-[28px]"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-label="Выбор порции"
-          >
-            <h4 className="mb-4 font-headline-md text-headline-md">{picking.name}</h4>
-            <PortionPicker
-              variants={getVariants(picking)}
-              value={variantId}
-              onChange={setVariantId}
-              currency={currency}
-            />
-            <button
-              type="button"
-              onClick={confirmVariant}
-              className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-primary py-4 font-label-md text-on-primary"
-            >
-              <Icon name="add" />
-              Добавить
-            </button>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 }

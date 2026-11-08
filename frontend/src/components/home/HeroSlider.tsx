@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { HERO_BANNER } from "@/lib/banners";
 
-/** Single promo banner with all volume-discount tiers. */
+/** Promo banner — free delivery from 7 portions. */
 export function HeroSlider() {
   const banner = HERO_BANNER;
 
@@ -18,34 +18,18 @@ export function HeroSlider() {
           sizes="100vw"
           className="object-cover"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/55 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/55 to-black/15" />
 
-        <div className="relative z-10 flex h-full flex-col justify-center gap-3 px-5 md:max-w-2xl md:gap-4 md:px-12">
+        <div className="relative z-10 flex h-full flex-col justify-center gap-3 px-5 md:max-w-2xl md:gap-5 md:px-12">
           <p className="font-label-md text-[12px] uppercase tracking-wide text-primary md:text-label-md">
             {banner.eyebrow}
           </p>
-          <h2 className="max-w-[280px] font-headline-lg-mobile text-headline-lg-mobile text-white md:max-w-xl md:text-display-lg md:font-display-lg">
+          <h2 className="max-w-[300px] font-headline-lg-mobile text-headline-lg-mobile text-white md:max-w-xl md:text-display-lg md:font-display-lg">
             {banner.title}
           </h2>
-          <p className="max-w-[260px] text-[13px] leading-snug text-white/85 md:max-w-md md:text-body-lg md:text-white/90">
+          <p className="max-w-[280px] text-[13px] leading-snug text-white/85 md:max-w-md md:text-body-lg md:text-white/90">
             {banner.subtitle}
           </p>
-
-          <div className="mt-1 flex flex-wrap gap-2 md:gap-3">
-            {banner.tiers.map((tier) => (
-              <div
-                key={tier.portions}
-                className="flex min-w-[88px] flex-col rounded-2xl bg-white/15 px-3 py-2 backdrop-blur-sm ring-1 ring-white/25 md:min-w-[110px] md:px-4 md:py-2.5"
-              >
-                <span className="font-label-md text-[11px] uppercase tracking-wide text-white/80 md:text-[12px]">
-                  {tier.portions} порц.
-                </span>
-                <span className="font-headline-md text-[20px] leading-none text-white md:text-headline-md">
-                  −{tier.percent}
-                </span>
-              </div>
-            ))}
-          </div>
         </div>
       </div>
     </section>

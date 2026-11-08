@@ -1,8 +1,10 @@
 "use client";
 
 import { formatPrice } from "@/lib/format";
-import { calcCartPricing, getNextDiscountTier } from "@/lib/discount";
+import { calcCartPricing } from "@/lib/discount";
 import type { CartItem } from "@/store/cart";
+
+const FREE_DELIVERY_PORTIONS = 7;
 
 interface CartDiscountSummaryProps {
   items: CartItem[];
@@ -11,7 +13,7 @@ interface CartDiscountSummaryProps {
   compact?: boolean;
 }
 
-/** Bright discount badge + price with/without discount (addons excluded from %). */
+/** Cart total + free-delivery hint from 7 main-dish portions. */
 export function CartDiscountSummary({
   items,
   currency,
@@ -20,11 +22,14 @@ export function CartDiscountSummary({
   const {
     discountPercent,
     discountedSubtotal,
-    saved,
     subtotal,
     foodPortions,
   } = calcCartPricing(items);
-  const next = getNextDiscountTier(foodPortions);
+  const freeDeliveryUnlocked = foodPortions >= FREE_DELIVERY_PORTIONS;
+  const remainingForFreeDelivery = Math.max(
+    0,
+    FREE_DELIVERY_PORTIONS - foodPortions,
+  );
 
   if (compact) {
     return (
@@ -48,26 +53,26 @@ export function CartDiscountSummary({
 
   return (
     <div className="space-y-3">
-      {discountPercent > 0 ? (
-        <div className="rounded-2xl bg-gradient-to-r from-primary to-[#FF9A4A] px-4 py-3 text-on-primary shadow-elevation-1">
-          <p className="font-label-md text-[13px] uppercase tracking-wide text-white/90">
-            Ваша скидка
-          </p>
-          <p className="mt-0.5 font-headline-lg text-headline-lg-mobile md:text-headline-lg">
-            −{discountPercent}%
-          </p>
-          <p className="mt-1 font-body-md text-[13px] text-white/90">
-            Экономия {formatPrice(saved, currency)} · {foodPortions} порц. блюд
-          </p>
-        </div>
-      ) : next ? (
-        <div className="rounded-2xl bg-primary/10 px-4 py-3 text-on-surface">
+      <div className="rounded-2xl bg-primary/10 px-4 py-3 text-on-surface">
+        {freeDeliveryUnlocked ? (
           <p className="font-body-md text-[13px] text-secondary">
-            Ещё {next.remaining} порц. блюд — и скидка{" "}
-            <span className="font-bold text-primary">{next.percent}%</span>
+            Доставка{" "}
+            <span className="font-bold text-primary">бесплатно</span>
+            {" "}· от 7 порций
           </p>
-        </div>
-      ) : null}
+        ) : (
+          <p className="font-body-md text-[13px] text-secondary">
+            От 7 порций — доставка{" "}
+            <span className="font-bold text-primary">бесплатно</span>
+            {remainingForFreeDelivery > 0 ? (
+              <>
+                {" "}
+                · ещё {remainingForFreeDelivery} порц.
+              </>
+            ) : null}
+          </p>
+        )}
+      </div>
 
       <div className="flex items-end justify-between gap-3">
         <span className="font-headline-md text-headline-md">Итого:</span>
