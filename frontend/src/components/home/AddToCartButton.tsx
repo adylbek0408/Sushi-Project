@@ -10,6 +10,7 @@ import {
   resolvePrice,
   resolveWeight,
 } from "@/lib/product";
+import { isOutOfStock } from "@/lib/outOfStock";
 import { useCartStore } from "@/store/cart";
 import { useUiStore } from "@/store/ui";
 import { useHydrated } from "@/hooks/useHydrated";
@@ -29,6 +30,7 @@ export function AddToCartButton({ product, currency }: AddToCartButtonProps) {
   const openCheckout = useUiStore((s) => s.openCheckout);
   const hydrated = useHydrated();
   const [justAdded, setJustAdded] = useState(false);
+  const unavailable = isOutOfStock(product);
 
   const selected = getDefaultVariant(product);
   const lineId = cartLineId(product.id, selected?.id);
@@ -47,7 +49,11 @@ export function AddToCartButton({ product, currency }: AddToCartButtonProps) {
         ) : null}
       </div>
 
-      {inCart ? (
+      {unavailable ? (
+        <div className="flex w-full items-center justify-center rounded-full bg-gray-500 px-6 py-4 font-label-md text-label-md text-white">
+          Нет в наличии
+        </div>
+      ) : inCart ? (
         <div className="flex items-center gap-4">
           <QuantityStepper
             value={inCart.quantity}

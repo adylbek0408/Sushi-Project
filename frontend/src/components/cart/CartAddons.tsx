@@ -7,6 +7,7 @@ import { useCategories, useProducts } from "@/hooks/useCatalog";
 import { useCartStore } from "@/store/cart";
 import { formatPrice } from "@/lib/format";
 import { mediaUrl } from "@/lib/config";
+import { isOutOfStock } from "@/lib/outOfStock";
 import { getDefaultVariant, resolvePrice } from "@/lib/product";
 import type { Product } from "@/types";
 
@@ -93,14 +94,10 @@ function AddonCard({
 }) {
   const image = mediaUrl(product.image);
   const price = resolvePrice(product, getDefaultVariant(product));
+  const unavailable = isOutOfStock(product);
 
-  return (
-    <button
-      type="button"
-      onClick={onAdd}
-      aria-label={`Добавить «${product.name}» к заказу`}
-      className="flex w-[140px] shrink-0 flex-col rounded-2xl bg-white text-left shadow-sm ring-1 ring-black/5 transition-transform active:scale-[0.97]"
-    >
+  const body = (
+    <>
       {/* Fixed height — iOS Safari often collapses aspect-ratio inside overflow-x flex */}
       <div className="relative h-[140px] w-[140px] shrink-0 overflow-hidden rounded-t-2xl bg-white">
         {image ? (
@@ -122,14 +119,44 @@ function AddonCard({
           {product.name}
         </h4>
         <div className="mt-auto flex items-center justify-between gap-1">
-          <span className="rounded-full bg-surface-container-high px-2.5 py-1 font-label-md text-[12px] text-on-surface">
-            {formatPrice(price, currency)}
-          </span>
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-on-surface text-white">
-            <Icon name="add" className="text-[18px]" />
-          </span>
+          {unavailable ? (
+            <span className="rounded-md bg-gray-500 px-2 py-1 font-label-md text-[11px] leading-none text-white">
+              Нет в наличии
+            </span>
+          ) : (
+            <>
+              <span className="rounded-full bg-surface-container-high px-2.5 py-1 font-label-md text-[12px] text-on-surface">
+                {formatPrice(price, currency)}
+              </span>
+              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-on-surface text-white">
+                <Icon name="add" className="text-[18px]" />
+              </span>
+            </>
+          )}
         </div>
       </div>
+    </>
+  );
+
+  if (unavailable) {
+    return (
+      <div
+        aria-label={`«${product.name}» — нет в наличии`}
+        className="flex w-[140px] shrink-0 flex-col rounded-2xl bg-white text-left shadow-sm ring-1 ring-black/5"
+      >
+        {body}
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onAdd}
+      aria-label={`Добавить «${product.name}» к заказу`}
+      className="flex w-[140px] shrink-0 flex-col rounded-2xl bg-white text-left shadow-sm ring-1 ring-black/5 transition-transform active:scale-[0.97]"
+    >
+      {body}
     </button>
   );
 }

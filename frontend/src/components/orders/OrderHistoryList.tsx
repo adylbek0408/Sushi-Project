@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { Icon } from "@/components/ui/Icon";
 import { useOrderHistoryStore } from "@/store/orderHistory";
@@ -8,7 +9,12 @@ import { formatPrice, pluralizeItems } from "@/lib/format";
 
 export function OrderHistoryList() {
   const orders = useOrderHistoryStore((s) => s.orders);
+  const pruneExpired = useOrderHistoryStore((s) => s.pruneExpired);
   const hydrated = useHydrated();
+
+  useEffect(() => {
+    if (hydrated) pruneExpired();
+  }, [hydrated, pruneExpired]);
 
   if (!hydrated) {
     return <p className="py-16 text-center font-body-md text-secondary">Загрузка…</p>;
