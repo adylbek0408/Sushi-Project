@@ -25,7 +25,12 @@ class BannerViewSet(viewsets.ReadOnlyModelViewSet):
 
 
 class ProductViewSet(viewsets.ReadOnlyModelViewSet):
-    """List/retrieve active products with category & search filtering."""
+    """List/retrieve products in active categories (incl. out-of-sale).
+
+    Products with is_active=False («В продаже» unchecked in admin) still
+    appear in the catalog so the storefront can show «Нет в наличии».
+    Ordering still rejects inactive products via Product.objects.active().
+    """
 
     serializer_class = ProductSerializer
     permission_classes = [AllowAny]
@@ -33,4 +38,8 @@ class ProductViewSet(viewsets.ReadOnlyModelViewSet):
     filterset_class = ProductFilter
     search_fields = ["name", "description"]
     ordering_fields = ["price", "sort_order", "created_at"]
-    queryset = Product.objects.active().select_related("category").prefetch_related("variants")
+    queryset = (
+        Product.objects.filter(category__is_active=True)
+        .select_related("category")
+        .prefetch_related("variants")
+    )

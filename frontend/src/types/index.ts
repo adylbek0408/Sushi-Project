@@ -35,6 +35,11 @@ export interface Product {
   weight: number | null;
   image: string | null;
   is_popular: boolean;
+  /**
+   * Admin «В продаже». When false, storefront shows «Нет в наличии»
+   * and blocks add-to-cart. Omitted/true = available.
+   */
+  is_active?: boolean;
   category: string;
   category_name: string;
   /** Portion sizes from API. Storefront always uses the large (~400 г) one. */

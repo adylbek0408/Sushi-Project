@@ -56,6 +56,7 @@ class ProductSerializer(RelativeImageMixin, serializers.ModelSerializer):
             "weight",
             "image",
             "is_popular",
+            "is_active",
             "category",
             "category_name",
             "variants",
